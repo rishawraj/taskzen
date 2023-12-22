@@ -1,28 +1,36 @@
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Task from "../components/Task";
+import NavBar from "../components/NavBar";
 
-interface Task {
+interface TaskType {
   text: string;
   completed: boolean;
 }
 
 export default function Home() {
-  const [taskList, setTaskList] = useState<Task[]>([]);
+  const [taskList, setTaskList] = useState<TaskType[]>([]);
   const [newTask, setNewTask] = useState("");
-
-  let sortedTasks: Task[];
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (newTask.trim() !== "") {
-      setTaskList([...taskList, { text: newTask, completed: false }]);
+    if (newTask.trim() === "") {
+      return;
     }
 
+    const newTaskList = [{ text: newTask, completed: false }, ...taskList].sort(
+      (a, b): number => {
+        if (a.completed && !b.completed) return 1;
+        if (!a.completed && b.completed) return -1;
+        return 0;
+      }
+    );
+    setTaskList(newTaskList);
+
     setNewTask("");
-    // toast.success("new task added");
   };
 
   const handleDelete = (index: number) => {
@@ -30,7 +38,6 @@ export default function Home() {
 
     updatedList.splice(index, 1);
     setTaskList(updatedList);
-    toast.info("task deleted successfully!");
   };
 
   const handleToggle = (index: number) => {
@@ -39,11 +46,7 @@ export default function Home() {
     updatedList[index].completed = !updatedList[index].completed;
     setTaskList(updatedList);
 
-    if (updatedList[index].completed === true) {
-      toast.success("Task Completed!");
-    }
-
-    sortedTasks = [...taskList].sort((a, b) => {
+    const sortedTasks = [...taskList].sort((a, b) => {
       if (a.completed && !b.completed) return 1;
       if (!a.completed && b.completed) return -1;
       return 0;
@@ -56,66 +59,47 @@ export default function Home() {
     setNewTask(e.target.value);
   };
 
+  const handleEdit = (index: number) => {
+    console.log(index);
+    //todo
+  };
+
   return (
     <>
-      <div className="bg-blue-300 h-screen w-screen flex justify-center">
-        <div className="w-full max-w-4xl bg-green-400">
-          <nav className=" flex justify-between p-2 pt-4 bg-pink-200 sticky ">
-            <h1 className="font-bold">Taskzen</h1>
-            <Link className="font-bold" to="/login">
-              Login
-            </Link>
-          </nav>
-
-          <main>
-            {taskList.map((task, index) => (
-              <div
-                key={index}
-                className={
-                  task.completed
-                    ? "bg-cyan-500 flex justify-between m-5"
-                    : "bg-red-400 flex justify-between m-5"
-                }
-              >
-                <button
-                  onClick={() => {
-                    handleToggle(index);
-                  }}
-                >
-                  {task.completed ? "completed" : "complete"}
-                </button>
-                <p>{task.text}</p>
-                <button
-                  onClick={() => {
-                    handleDelete(index);
-                  }}
-                >
-                  delete
-                </button>
-              </div>
-            ))}
-          </main>
+      <div>
+        <div className="bg-background">
+          <NavBar />
 
           <form
-            className="bg-yellow-500 p-2 flex flex-col fixed bottom-0 w-full max-w-4xl"
+            className="flex border-2 border-gray-50"
             onSubmit={handleSubmit}
           >
+            <button className="p-2" type="submit">
+              +
+            </button>
             <input
-              className="p-2 border-2 border-black"
+              name="task"
+              className="p-2 w-full focus:outline-none"
               type="text"
               placeholder="add a new task"
               value={newTask}
               onChange={handleInputChange}
             />
-            <button
-              className="p-2 bg-white mt-4 border-2 border-green-400"
-              type="submit"
-            >
-              add
-            </button>
           </form>
+          <main className="mb-40">
+            {taskList.map((task, index) => (
+              <Task
+                key={index}
+                task={task}
+                index={index}
+                handleDelete={handleDelete}
+                handleToggle={handleToggle}
+                handleEdit={handleEdit}
+              />
+            ))}
+          </main>
 
-          <footer>Footer</footer>
+          {/* <footer>Footer</footer> */}
         </div>
       </div>
       <ToastContainer />
