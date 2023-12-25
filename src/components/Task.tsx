@@ -23,7 +23,7 @@ function Task({
       // className={`${
       //   task.completed ? "bg-cyan-800" : "bg-primary"
       // } flex justify-between m-5 p-2`}
-      className="bg-secondary m-3 flex justify-around gap-3 w-full border-2 border-gray-50"
+      className="bg-primary my-3 flex justify-around gap-3 w-full border-0 border-gray-50 text-text"
     >
       <input
         // className=""

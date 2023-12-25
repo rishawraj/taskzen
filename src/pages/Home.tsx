@@ -66,23 +66,32 @@ export default function Home() {
 
   return (
     <>
-      <div>
-        <div className="bg-background">
+      <div className="h-screen w-full flex flex-col md:flex-row md:justify-between bg-background text-text p-3">
+        <div className="lg:w-1/6">
           <NavBar />
-
-          <form
-            className="flex border-2 border-gray-50"
-            onSubmit={handleSubmit}
-          >
+        </div>
+        <div className="lg:w-full md:w-2/3">
+          <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
             <button className="p-2" type="submit">
-              +
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                className="fill-text"
+                // stroke="text-text"
+                // width="3"
+              >
+                <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"></path>
+              </svg>
             </button>
             <input
               name="task"
-              className="p-2 w-full focus:outline-none"
+              className="p-2 w-full bg-transparent focus:outline-none"
               type="text"
               placeholder="add a new task"
               value={newTask}
+              autoComplete="off"
               onChange={handleInputChange}
             />
           </form>
@@ -98,9 +107,9 @@ export default function Home() {
               />
             ))}
           </main>
-
-          {/* <footer>Footer</footer> */}
         </div>
+
+        <div className="hidden lg:flex bg-accent w-3/6"></div>
       </div>
       <ToastContainer />
     </>
