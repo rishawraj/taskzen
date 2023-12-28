@@ -1,14 +1,8 @@
-// import { Link } from "react-router-dom";
 import { useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Task from "../components/Task";
 import NavBar from "../components/NavBar";
-
-interface TaskType {
-  text: string;
-  completed: boolean;
-}
 
 export default function Home() {
   const [taskList, setTaskList] = useState<TaskType[]>([]);
@@ -21,13 +15,14 @@ export default function Home() {
       return;
     }
 
-    const newTaskList = [{ text: newTask, completed: false }, ...taskList].sort(
-      (a, b): number => {
-        if (a.completed && !b.completed) return 1;
-        if (!a.completed && b.completed) return -1;
-        return 0;
-      }
-    );
+    const newTaskList = [
+      { title: newTask, completed: false },
+      ...taskList,
+    ].sort((a, b): number => {
+      if (a.completed && !b.completed) return 1;
+      if (!a.completed && b.completed) return -1;
+      return 0;
+    });
     setTaskList(newTaskList);
 
     setNewTask("");
@@ -59,18 +54,29 @@ export default function Home() {
     setNewTask(e.target.value);
   };
 
-  const handleEdit = (index: number) => {
-    console.log(index);
-    //todo
+  //todo
+  const handleEdit = (index: number, task: TaskType) => {
+    console.log(task);
+    const newTaskList = [...taskList];
+    const newTask = newTaskList[index];
+
+    newTask.title = task.title;
+    newTask.description = task.description;
+    newTask.list = task.list;
+    newTask.dueDate = task.dueDate;
+    newTask.tags = task.tags;
+    newTask.subTasks = task.subTasks;
+
+    setTaskList(newTaskList);
   };
 
   return (
     <>
-      <div className="h-screen w-full flex flex-col md:flex-row md:justify-between bg-background text-text p-3">
-        <div className="lg:w-1/6">
+      <div className="h-full min-h-screen w-full flex flex-col md:flex-row md:justify-between bg-background text-text p-3">
+        <div className="lg:w-2/6">
           <NavBar />
         </div>
-        <div className="lg:w-full md:w-2/3">
+        <div className="lg:w-full md:w-2/3 xl:2/6">
           <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
             <button className="p-2" type="submit">
               <svg
@@ -95,7 +101,7 @@ export default function Home() {
               onChange={handleInputChange}
             />
           </form>
-          <main className="mb-40">
+          <main className="">
             {taskList.map((task, index) => (
               <Task
                 key={index}
@@ -109,8 +115,9 @@ export default function Home() {
           </main>
         </div>
 
-        <div className="hidden lg:flex bg-accent w-3/6"></div>
+        <div className="hidden xl:flex bg-accent w-4/6"></div>
       </div>
+
       <ToastContainer />
     </>
   );
