@@ -18,7 +18,7 @@
     "strict": true,
     "noUnusedLocals": true,
     // todo
-    // "noUnusedParameters": true,
+    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],

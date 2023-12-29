@@ -1,3 +1,5 @@
+// import { ReactNode } from "react";
+
 interface TaskType {
   title: string;
   completed: boolean;
@@ -12,6 +14,11 @@ interface SubTaskType {
   completed: boolean;
 }
 
+interface NavBarProps {
+  toggleTheme: () => void;
+  isDarkMode: boolean;
+}
+
 interface TaskProps {
   index: number;
   task: TaskType;
@@ -24,4 +31,10 @@ interface TaskFormProps {
   index: number;
   task: TaskType;
   handleEdit: (index: number, task: TaskType) => void;
+  closeModal: () => void;
+}
+
+interface ModalPropType {
+  isOpen: boolean;
+  children?: Node;
 }

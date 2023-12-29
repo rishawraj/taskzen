@@ -1,19 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
-function NavBar() {
-  const intialDarkMode = localStorage.getItem("darkMode") === "true" || false;
-  const [isDarkMode, setDarkMode] = useState(intialDarkMode);
+function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
+  // const intialDarkMode = localStorage.getItem("darkMode") === "true" || false;
+  // const [isDarkMode, setDarkMode] = useState(intialDarkMode);
   const [isDrawer, setDrawer] = useState(false);
 
-  useEffect(() => {
-    document.body.classList.toggle("dark", isDarkMode);
-    localStorage.setItem("darkMode", `${isDarkMode}`);
-  }, [isDarkMode]);
+  // useEffect(() => {
+  //   document.body.classList.toggle("dark", isDarkMode);
+  //   localStorage.setItem("darkMode", `${isDarkMode}`);
+  // }, [isDarkMode]);
 
-  const toggleTheme = () => {
-    setDarkMode(!isDarkMode);
-  };
+  // const toggleTheme = () => {
+  //   setDarkMode(!isDarkMode);
+  // };
 
   const toggleDrawer = () => {
     setDrawer(!isDrawer);

@@ -1,12 +1,32 @@
-import { useState } from "react";
-import { ToastContainer } from "react-toastify";
+import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Task from "../components/Task";
 import NavBar from "../components/NavBar";
+import {
+  getLocalStorageItem,
+  setLocalStorageItem,
+} from "../utils/localStorage";
 
 export default function Home() {
+  const intialDarkMode = localStorage.getItem("darkMode") === "true" || false;
+  const [isDarkMode, setDarkMode] = useState(intialDarkMode);
   const [taskList, setTaskList] = useState<TaskType[]>([]);
   const [newTask, setNewTask] = useState("");
+
+  useEffect(() => {
+    document.body.classList.toggle("dark", isDarkMode);
+    localStorage.setItem("darkMode", `${isDarkMode}`);
+  }, [isDarkMode]);
+
+  useEffect(() => {
+    const tasks = getLocalStorageItem<TaskType[]>("tasks");
+    setTaskList(tasks);
+  }, []);
+
+  const toggleTheme = () => {
+    setDarkMode(!isDarkMode);
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,25 +43,35 @@ export default function Home() {
       if (!a.completed && b.completed) return -1;
       return 0;
     });
+
+    setLocalStorageItem("tasks", newTaskList);
     setTaskList(newTaskList);
 
     setNewTask("");
   };
 
   const handleDelete = (index: number) => {
-    const updatedList = [...taskList];
+    const localTaskList = getLocalStorageItem<TaskType[]>("tasks");
+
+    const updatedList = [...localTaskList];
+    const taskName = updatedList[index];
 
     updatedList.splice(index, 1);
+
+    setLocalStorageItem("tasks", updatedList);
     setTaskList(updatedList);
+
+    toast.info(`Task: ${taskName.title} deleted.`, {
+      theme: isDarkMode ? "dark" : "light",
+    });
   };
 
   const handleToggle = (index: number) => {
     const updatedList = [...taskList];
 
     updatedList[index].completed = !updatedList[index].completed;
-    setTaskList(updatedList);
 
-    const sortedTasks = [...taskList].sort((a, b) => {
+    const sortedTasks = [...updatedList].sort((a, b) => {
       if (a.completed && !b.completed) return 1;
       if (!a.completed && b.completed) return -1;
       return 0;
@@ -54,10 +84,13 @@ export default function Home() {
     setNewTask(e.target.value);
   };
 
-  //todo
   const handleEdit = (index: number, task: TaskType) => {
-    console.log(task);
-    const newTaskList = [...taskList];
+    console.log("handleEdit called!");
+
+    const localTaskList = getLocalStorageItem<TaskType[]>("tasks");
+
+    const newTaskList = [...localTaskList];
+
     const newTask = newTaskList[index];
 
     newTask.title = task.title;
@@ -67,14 +100,18 @@ export default function Home() {
     newTask.tags = task.tags;
     newTask.subTasks = task.subTasks;
 
+    setLocalStorageItem("tasks", newTaskList);
+
     setTaskList(newTaskList);
+
+    toast.success("Changes Saved!", { theme: isDarkMode ? "dark" : "light" });
   };
 
   return (
     <>
       <div className="h-full min-h-screen w-full flex flex-col md:flex-row md:justify-between bg-background text-text p-3">
         <div className="lg:w-2/6">
-          <NavBar />
+          <NavBar toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
         </div>
         <div className="lg:w-full md:w-2/3 xl:2/6">
           <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
@@ -85,8 +122,6 @@ export default function Home() {
                 height="24"
                 viewBox="0 0 24 24"
                 className="fill-text"
-                // stroke="text-text"
-                // width="3"
               >
                 <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"></path>
               </svg>
@@ -118,7 +153,7 @@ export default function Home() {
         <div className="hidden xl:flex bg-accent w-4/6"></div>
       </div>
 
-      <ToastContainer />
+      <ToastContainer autoClose={2500} position="bottom-right" />
     </>
   );
 }

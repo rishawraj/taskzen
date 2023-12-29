@@ -20,8 +20,8 @@ function Task({
         <div className="flex gap-3">
           <input
             type="checkbox"
-            name="check"
-            id="check"
+            name={`check-${index}`}
+            id={`check-${index}`}
             checked={task.completed}
             onChange={() => handleToggle(index)}
           />
@@ -48,8 +48,13 @@ function Task({
         </button>
       </div>
 
-      <Modal isOpen={modalOpen} onClose={closeModal}>
-        <TaskForm index={index} task={task} handleEdit={handleEdit} />
+      <Modal isOpen={modalOpen}>
+        <TaskForm
+          index={index}
+          task={task}
+          handleEdit={handleEdit}
+          closeModal={closeModal}
+        />
 
         <div className=" flex flex-col bg-background">
           {/* btns */}
@@ -62,7 +67,7 @@ function Task({
             >
               delete
             </button>
-            <button onClick={closeModal}>close</button>
+            {/* <button onClick={closeModal}>close</button> */}
           </div>
         </div>
       </Modal>
