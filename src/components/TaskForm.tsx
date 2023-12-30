@@ -3,10 +3,17 @@ import { getLocalStorageItem } from "../utils/localStorage";
 
 function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
   const [title, setTitle] = useState(task.title);
-  const [description, setDescription] = useState(task.description);
-  const [list, setList] = useState(task.list);
+  const [description, setDescription] = useState(task.description || "");
+  const [list, setList] = useState<string[]>([]);
+  const [selectedListItem, setSelectedListItem] = useState(
+    task.selectedListItem
+  );
   const [dueDate, setDueDate] = useState(task.dueDate);
-  const [tags, setTags] = useState(task.tags);
+
+  const [taskTags, setTaskTags] = useState<string[]>(task.tags || []);
+
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagListOpen, setTagLisOpen] = useState(false);
 
   const [subTaskList, setSubTaskList] = useState(task.subTasks || []);
 
@@ -16,14 +23,19 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
   });
 
   useEffect(() => {
-    return () => {
-      const tasks = getLocalStorageItem<TaskType[]>("tasks");
-      const subTasks = tasks[index].subTasks || [];
-      setSubTaskList(subTasks);
-    };
+    const localList = getLocalStorageItem<string[]>("list") || [];
+    setList(localList);
+
+    const localTags = getLocalStorageItem<string[]>("tags");
+    setTags(localTags);
   }, []);
 
   const handleModalClose = () => {
+    console.log("does this also gets run??");
+
+    const tasks = getLocalStorageItem<TaskType[]>("tasks");
+    const subTasks = tasks[index].subTasks || [];
+    setSubTaskList(subTasks);
     closeModal();
   };
 
@@ -40,22 +52,6 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
       document.removeEventListener("keydown", handleEscapeKeyPress);
     };
   }, []);
-
-  const handleSubmit = () => {
-    console.log("handleSubmit called from taskform.tsx");
-    const updatedTask: TaskType = {
-      title: title,
-      completed: task.completed,
-      description: description,
-      list: list,
-      dueDate: dueDate,
-      tags: tags,
-      subTasks: subTaskList,
-    };
-
-    // saves it
-    handleEdit(index, updatedTask);
-  };
 
   const handleSubTaskFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -88,34 +84,86 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
     setSubTaskList(updatedSubTaskList);
   };
 
+  const handleSubmit = () => {
+    console.log("handleSubmit called from taskform.tsx");
+    const updatedTask: TaskType = {
+      title: title,
+      completed: task.completed,
+      description: description,
+      // list: list,
+      selectedListItem: selectedListItem,
+      dueDate: dueDate,
+      tags: taskTags,
+      subTasks: subTaskList,
+    };
+
+    handleEdit(index, updatedTask);
+  };
+
+  const handleListChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log("selcted option");
+    setSelectedListItem(e.target.value);
+  };
+
+  const handleAddTags = (index: number) => {
+    if (taskTags.length === tags.length) return;
+
+    const newTag = tags[index];
+    const indexOfTag = taskTags.indexOf(newTag);
+
+    if (indexOfTag >= 0) return;
+
+    setTaskTags([...taskTags, tags[index]]);
+  };
+
+  const handleDeleteTaskTags = (index: number) => {
+    const newTaskTags = [...taskTags];
+    newTaskTags.splice(index, 1);
+    setTaskTags(newTaskTags);
+  };
+
   return (
     <>
       <div className="text-text">
         <div>TaskForm</div>
 
         <div className="flex flex-col gap-2">
-          {/* <p>{task && task.title}</p> */}
-          {/* title */}
-          {/* <p>{title}</p> */}
           <input
+            name="title"
+            id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+
           {/* desc */}
           <input
+            name="description"
+            id="description"
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+
           {/* list */}
           <label htmlFor="list">List</label>
-          <select id="list" name="list">
+          <select
+            id="list"
+            name="list"
+            value={selectedListItem}
+            onChange={handleListChange}
+          >
+            <option value="">Select an option</option>
             {list &&
-              list.map((listItem) => {
-                return <option value={listItem}>{listItem}</option>;
+              list.map((listItem, i) => {
+                return (
+                  <option key={i} value={listItem}>
+                    {listItem}
+                  </option>
+                );
               })}
           </select>
+
           {/* due back */}
           <label htmlFor="dueDate">Due date</label>
           <input
@@ -127,8 +175,37 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
 
           {/* tags */}
           <label>Tags</label>
-          {tags && tags.map((tag) => <p>{tag}</p>)}
-          <button>+ add tags</button>
+          <div>
+            {taskTags.map((tag, i) => (
+              <span
+                key={i}
+                className="inline-flex flex-wrap gap-2 p-2 bg-amber-300 mr-2"
+              >
+                <p>{tag}</p>
+                <button onClick={() => handleDeleteTaskTags(index)}>X</button>
+              </span>
+            ))}
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            {tagListOpen &&
+              tags &&
+              tags.map((tag, i) => (
+                <button
+                  onClick={() => handleAddTags(i)}
+                  className="py-2 bg-lime-300 min-w-[70px]"
+                  key={i}
+                >
+                  {tag}
+                </button>
+              ))}
+            <button
+              onClick={() => setTagLisOpen(!tagListOpen)}
+              className="p-2 bg-fuchsia-300"
+            >
+              + add tags
+            </button>
+          </div>
 
           {/* subtask */}
           <h2>Subtasks:</h2>
@@ -161,15 +238,15 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
             />
           </form>
 
-          {subTaskList.map((subTask, index) => (
+          {subTaskList.map((subTask, i) => (
             <div
-              key={index}
+              key={i}
               className="flex justify-between p-2 border-b-2 border-text "
             >
               <div className="flex gap-4">
                 <p>{subTask.completed ? "1" : "0"}</p>
                 <input
-                  id={index.toString()}
+                  id={i.toString()}
                   type="checkbox"
                   checked={subTask.completed}
                   onChange={() => handleSubTaskToggle(index)}

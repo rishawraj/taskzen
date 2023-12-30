@@ -29,6 +29,7 @@ function Task({
           <p>{task.title}</p>
 
           {task.dueDate && <p>{task.dueDate}</p>}
+          {task.selectedListItem && <p>{task.selectedListItem}</p>}
           {task.subTasks?.length ?? 0 >= 1 ? (
             <p className="bg-red-400 px-2">{task.subTasks!.length}</p>
           ) : (
@@ -48,7 +49,7 @@ function Task({
         </button>
       </div>
 
-      <Modal isOpen={modalOpen}>
+      <Modal isOpen={modalOpen} onClose={closeModal}>
         <TaskForm
           index={index}
           task={task}

@@ -1,19 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import List from "./List";
+import Tags from "./Tags";
 
 function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
-  // const intialDarkMode = localStorage.getItem("darkMode") === "true" || false;
-  // const [isDarkMode, setDarkMode] = useState(intialDarkMode);
   const [isDrawer, setDrawer] = useState(false);
-
-  // useEffect(() => {
-  //   document.body.classList.toggle("dark", isDarkMode);
-  //   localStorage.setItem("darkMode", `${isDarkMode}`);
-  // }, [isDarkMode]);
-
-  // const toggleTheme = () => {
-  //   setDarkMode(!isDarkMode);
-  // };
 
   const toggleDrawer = () => {
     setDrawer(!isDrawer);
@@ -26,6 +17,7 @@ function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
           <h1 className="font-bold">Taskzen</h1>
         </Link>
 
+        {/* mobile menu */}
         <div className="md:hidden">
           <button onClick={toggleDrawer}>
             <svg
@@ -71,18 +63,17 @@ function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
           <div>upcoming</div>
           <div>today</div>
           <br />
-
-          <h2 className="font-bold">lists</h2>
-          <div>personal</div>
-          <div>work</div>
-          <button>+ add list</button>
+          <List />
           <br />
+          <Tags />
+          <br />
+          {/* <br /> */}
 
           <Link className="font-bold" to="/login">
             Login
           </Link>
 
-          <div className="font-bold">Log Out</div>
+          {/* <div className="font-bold">Log Out</div> */}
           <br />
 
           <button className="text-text" onClick={toggleTheme}>
@@ -141,18 +132,19 @@ function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
             <div>upcoming</div>
             <div>today</div>
             <br />
+            <List />
 
-            <h2 className="font-bold">lists</h2>
-            <div>personal</div>
-            <div>work</div>
-            <button>+ add list</button>
             <br />
+
+            <Tags />
+            <br />
+            {/* <br /> */}
 
             <Link className="font-bold" to="/login">
               Login
             </Link>
 
-            <div className="font-bold">Log Out</div>
+            {/* <div className="font-bold">Log Out</div> */}
             <br />
 
             <button className="text-text" onClick={toggleTheme}>

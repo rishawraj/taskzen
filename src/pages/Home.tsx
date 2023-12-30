@@ -20,7 +20,7 @@ export default function Home() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    const tasks = getLocalStorageItem<TaskType[]>("tasks");
+    const tasks = getLocalStorageItem<TaskType[]>("tasks") || [];
     setTaskList(tasks);
   }, []);
 
@@ -85,7 +85,8 @@ export default function Home() {
   };
 
   const handleEdit = (index: number, task: TaskType) => {
-    console.log("handleEdit called!");
+    // console.log(task.list);
+    console.log(task);
 
     const localTaskList = getLocalStorageItem<TaskType[]>("tasks");
 
@@ -95,7 +96,8 @@ export default function Home() {
 
     newTask.title = task.title;
     newTask.description = task.description;
-    newTask.list = task.list;
+    // newTask.list = task.list;
+    newTask.selectedListItem = task.selectedListItem;
     newTask.dueDate = task.dueDate;
     newTask.tags = task.tags;
     newTask.subTasks = task.subTasks;
@@ -136,6 +138,18 @@ export default function Home() {
               onChange={handleInputChange}
             />
           </form>
+
+          {/* only tags */}
+
+          <div className=" inline-flex gap-2 bg-amber-300 p-2 m-2">
+            <p>tag1</p>
+            <p>x</p>
+          </div>
+          <div className=" inline-flex gap-2 bg-rose-300 p-2 m-2">
+            <p>tag1</p>
+            <p>x</p>
+          </div>
+
           <main className="">
             {taskList.map((task, index) => (
               <Task

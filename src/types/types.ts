@@ -4,11 +4,13 @@ interface TaskType {
   title: string;
   completed: boolean;
   description?: string;
-  list?: string[];
+  // list?: string[];
+  selectedListItem?: string;
   dueDate?: string;
   tags?: string[];
   subTasks?: SubTaskType[];
 }
+
 interface SubTaskType {
   title: string;
   completed: boolean;
@@ -32,9 +34,4 @@ interface TaskFormProps {
   task: TaskType;
   handleEdit: (index: number, task: TaskType) => void;
   closeModal: () => void;
-}
-
-interface ModalPropType {
-  isOpen: boolean;
-  children?: Node;
 }
