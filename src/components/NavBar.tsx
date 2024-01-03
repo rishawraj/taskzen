@@ -2,16 +2,41 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import List from "./List";
 import Tags from "./Tags";
+// import { DarkModeButton } from "./DarkModeButton";
+import { useDarkMode } from "../Context/DarkModeContext";
 
-function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
+function NavBar() {
   const [isDrawer, setDrawer] = useState(false);
+  const { isDarkMode, toggleTheme } = useDarkMode();
+
+  const themeIcon = isDarkMode ? (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      className="fill-text"
+    >
+      <path d="M6.995 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007-2.246-5.007-5.007-5.007S6.995 9.239 6.995 12zM11 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2H2zm17 0h3v2h-3zM5.637 19.778l-1.414-1.414 2.121-2.121 1.414 1.414zM16.242 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.344 7.759 4.223 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z"></path>
+    </svg>
+  ) : (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      className="fill-text"
+    >
+      <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.946 9.946 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"></path>
+    </svg>
+  );
 
   const toggleDrawer = () => {
     setDrawer(!isDrawer);
   };
 
   return (
-    <nav className="bg-background flex flex-col p-2 sticky text-text h-full capitalize">
+    <nav className="bg-pink-1000 flex flex-col p-2 sticky text-text h-full capitalize">
       <div className="flex md:flex-col justify-between">
         <Link to="/">
           <h1 className="font-bold">Taskzen</h1>
@@ -60,45 +85,23 @@ function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
           </form>
 
           <h2 className=" font-bold">tasks</h2>
-          <div>upcoming</div>
-          <div>today</div>
-          <br />
+
+          <div className="flex flex-col">
+            <Link to="/upcoming">Upcoming</Link>
+            <Link to="/today">Today</Link>
+          </div>
+
           <List />
-          <br />
           <Tags />
-          <br />
-          {/* <br /> */}
 
           <Link className="font-bold" to="/login">
             Login
           </Link>
 
-          {/* <div className="font-bold">Log Out</div> */}
           <br />
 
-          <button className="text-text" onClick={toggleTheme}>
-            {!isDarkMode ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                className="fill-text"
-              >
-                <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.946 9.946 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"></path>
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                className="fill-text"
-              >
-                <path d="M6.995 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007-2.246-5.007-5.007-5.007S6.995 9.239 6.995 12zM11 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2H2zm17 0h3v2h-3zM5.637 19.778l-1.414-1.414 2.121-2.121 1.414 1.414zM16.242 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.344 7.759 4.223 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z"></path>
-              </svg>
-            )}
-          </button>
+          {/* <DarkModeButton /> */}
+          <button onClick={toggleTheme}>{themeIcon}</button>
         </div>
       </div>
 
@@ -129,8 +132,10 @@ function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
           </form>
           <div className="w-2/3 p-2 mt-3 ">
             <h2 className=" font-bold">tasks</h2>
-            <div>upcoming</div>
-            <div>today</div>
+            <div className="flex flex-col">
+              <Link to="/upcoming">Upcoming</Link>
+              <Link to="/today">Today</Link>
+            </div>
             <br />
             <List />
 
@@ -144,32 +149,9 @@ function NavBar({ toggleTheme, isDarkMode }: NavBarProps) {
               Login
             </Link>
 
-            {/* <div className="font-bold">Log Out</div> */}
             <br />
 
-            <button className="text-text" onClick={toggleTheme}>
-              {!isDarkMode ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  className="fill-text"
-                >
-                  <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.946 9.946 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"></path>
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  className="fill-text"
-                >
-                  <path d="M6.995 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007-2.246-5.007-5.007-5.007S6.995 9.239 6.995 12zM11 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2H2zm17 0h3v2h-3zM5.637 19.778l-1.414-1.414 2.121-2.121 1.414 1.414zM16.242 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.344 7.759 4.223 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z"></path>
-                </svg>
-              )}
-            </button>
+            <button onClick={toggleTheme}>{themeIcon}</button>
           </div>
         </div>
       )}

@@ -11,7 +11,6 @@ const Modal = ({ isOpen, children, onClose }: ModalPropType) => {
 
   useEffect(() => {
     const handleClickOuside = (e: MouseEvent) => {
-      console.log("handle click outside!");
       if (
         modalContentRef.current &&
         !modalContentRef.current.contains(e.target as Node)
@@ -33,10 +32,7 @@ const Modal = ({ isOpen, children, onClose }: ModalPropType) => {
 
   return (
     <div className="fixed bg-black/25 inset-0 flex items-center justify-center">
-      <div
-        ref={modalContentRef}
-        className="absolute bg-accent p-4 rounded shadow-lg"
-      >
+      <div className="w-2/3 md:w-1/3 bg-red-500" ref={modalContentRef}>
         {children}
       </div>
     </div>

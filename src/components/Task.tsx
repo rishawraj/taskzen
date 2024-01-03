@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Modal from "./Modal";
-import TaskForm from "./TaskForm";
+import TaskDetailsForm from "./TaskDetailsForm";
 
 function Task({
   index,
@@ -23,7 +23,7 @@ function Task({
             name={`check-${index}`}
             id={`check-${index}`}
             checked={task.completed}
-            onChange={() => handleToggle(index)}
+            onChange={() => handleToggle(task.id)}
           />
 
           <p>{task.title}</p>
@@ -48,28 +48,26 @@ function Task({
           </svg>
         </button>
       </div>
-
       <Modal isOpen={modalOpen} onClose={closeModal}>
-        <TaskForm
+        <TaskDetailsForm
           index={index}
           task={task}
           handleEdit={handleEdit}
           closeModal={closeModal}
         />
 
-        <div className=" flex flex-col bg-background">
-          {/* btns */}
-          <div className="flex gap-4 bg-red-400">
-            <button
-              onClick={() => {
-                handleDelete(index);
-                closeModal();
-              }}
-            >
-              delete
-            </button>
-            {/* <button onClick={closeModal}>close</button> */}
-          </div>
+        {/* btns */}
+        <div>
+          <button
+            className="bg-red-400 p-2 my-2 w-full flex justify-center capitalize"
+            onClick={() => {
+              handleDelete(task.id);
+              closeModal();
+            }}
+          >
+            delete
+          </button>
+          {/* <button onClick={closeModal}>close</button> */}
         </div>
       </Modal>
     </>

@@ -3,14 +3,15 @@ import {
   setLocalStorageItem,
   getLocalStorageItem,
 } from "../utils/localStorage";
+import { NavLink } from "react-router-dom";
 
 function List() {
   const [list, setList] = useState<string[]>([]);
   const [newListItem, setNewListItem] = useState("");
 
   useEffect(() => {
-    const locallList = getLocalStorageItem<string[]>("list") || [];
-    setList(locallList);
+    const localList = getLocalStorageItem<string[]>("list") || [];
+    setList(localList);
   }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,9 +25,17 @@ function List() {
   return (
     <>
       <h1 className="font-bold">List:</h1>
-      {list.map((listItem, index) => (
-        <p key={index}>{listItem}</p>
-      ))}
+      <div className="flex flex-col">
+        {list.map((listItem, index) => (
+          <NavLink
+            className={({ isActive }) => (isActive ? "bg-green-300" : "")}
+            key={index}
+            to={`/${listItem}`}
+          >
+            {listItem}
+          </NavLink>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit}>
         <button type="submit">+</button>

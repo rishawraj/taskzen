@@ -1,10 +1,8 @@
-// import { ReactNode } from "react";
-
 interface TaskType {
+  id: string;
   title: string;
   completed: boolean;
   description?: string;
-  // list?: string[];
   selectedListItem?: string;
   dueDate?: string;
   tags?: string[];
@@ -17,21 +15,21 @@ interface SubTaskType {
 }
 
 interface NavBarProps {
-  toggleTheme: () => void;
-  isDarkMode: boolean;
+  toggleTheme?: () => void;
+  isDarkMode?: boolean;
 }
 
 interface TaskProps {
   index: number;
   task: TaskType;
-  handleToggle: (index: number) => void;
-  handleDelete: (index: number) => void;
-  handleEdit: (index: number, task: TaskType) => void;
+  handleToggle: (ID: string) => void;
+  handleDelete: (ID: string) => void;
+  handleEdit: (ID: string, task: TaskType) => void;
 }
 
 interface TaskFormProps {
   index: number;
   task: TaskType;
-  handleEdit: (index: number, task: TaskType) => void;
+  handleEdit: (ID: string, task: TaskType) => void;
   closeModal: () => void;
 }

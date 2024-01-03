@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { getLocalStorageItem } from "../utils/localStorage";
+import { crossIcon } from "../assets/icons";
 
-function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
+function TaskDetailsForm({
+  index,
+  task,
+  handleEdit,
+  closeModal,
+}: TaskFormProps) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
   const [list, setList] = useState<string[]>([]);
@@ -63,7 +69,9 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
   };
 
   const handleSubTaskToggle = (index: number) => {
-    const newSubTaskList = [...subTaskList];
+    const localTaskList = getLocalStorageItem<TaskType[]>("tasks") || [];
+
+    const newSubTaskList = [...localTaskList];
 
     newSubTaskList[index].completed = !newSubTaskList[index].completed;
 
@@ -87,6 +95,7 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
   const handleSubmit = () => {
     console.log("handleSubmit called from taskform.tsx");
     const updatedTask: TaskType = {
+      id: task.id,
       title: title,
       completed: task.completed,
       description: description,
@@ -97,7 +106,8 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
       subTasks: subTaskList,
     };
 
-    handleEdit(index, updatedTask);
+    handleEdit(task.id, updatedTask);
+    closeModal();
   };
 
   const handleListChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -125,7 +135,10 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
   return (
     <>
       <div className="text-text">
-        <div>TaskForm</div>
+        <div className="flex justify-between my-2">
+          <div>TaskForm</div>
+          <button onClick={closeModal}>{crossIcon}</button>
+        </div>
 
         <div className="flex flex-col gap-2">
           <input
@@ -182,7 +195,9 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
                 className="inline-flex flex-wrap gap-2 p-2 bg-amber-300 mr-2"
               >
                 <p>{tag}</p>
-                <button onClick={() => handleDeleteTaskTags(index)}>X</button>
+                <button onClick={() => handleDeleteTaskTags(index)}>
+                  {crossIcon}
+                </button>
               </span>
             ))}
           </div>
@@ -275,11 +290,10 @@ function TaskForm({ index, task, handleEdit, closeModal }: TaskFormProps) {
           >
             Save Changes
           </button>
-          <button onClick={handleModalClose}>close modal</button>
         </div>
       </div>
     </>
   );
 }
 
-export default TaskForm;
+export default TaskDetailsForm;
