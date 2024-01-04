@@ -10,8 +10,8 @@ import { crossIcon, dotsVertical, filterIcon } from "../assets/icons";
 import { useDarkMode } from "../Context/DarkModeContext";
 import Modal from "./Modal";
 
-// import { v4 as uuidv4 } from "uuid";
 import { v4 as uuidv4 } from "uuid";
+import TaskDetailsForm from "./TaskDetailsForm";
 
 interface TaskLIstControlProps {
   listName?: string;
@@ -26,14 +26,42 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
   const { isDarkMode } = useDarkMode();
   const [isDotMenu, setIsDotMenu] = useState(false);
 
+  const [isSideModal, setIsSideModal] = useState(false);
+
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  const [isScreenBelowXL, setIsScreenBelowXL] = useState(
+    window.innerWidth < 1280
+  );
+
+  const closeSideModal = () => setIsSideModal(false);
+  const openSideModal = () => setIsSideModal(true);
+
   const [trigger, setTrigger] = useState(false);
-
-  // let trigger = false;
-
-  // const []
 
   const closeDotMenu = () => setIsDotMenu(false);
   const openDotMenu = () => setIsDotMenu(true);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const newWidth = window.innerWidth;
+      setWindowSize({
+        width: newWidth,
+        height: window.innerHeight,
+      });
+
+      // Update the state based on the new window width
+      setIsScreenBelowXL(newWidth < 1280);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     const filteredTasks = listName
@@ -166,75 +194,89 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
   };
 
   return (
-    <div>
-      <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
-        <button className="p-2" type="submit">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            className="fill-text"
-          >
-            <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"></path>
-          </svg>
-        </button>
-        <input
-          name="task"
-          className="p-2 w-full bg-transparent focus:outline-none"
-          type="text"
-          placeholder="add a new task"
-          value={newTask}
-          autoComplete="off"
-          onChange={handleInputChange}
-        />
-      </form>
+    <div className="flex flex-col xl:flex-row ">
+      <div className="flex-grow p-5 mt-5">
+        {/* form */}
+        <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
+          <button className="p-2" type="submit">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              className="fill-text"
+            >
+              <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"></path>
+            </svg>
+          </button>
+          <input
+            name="task"
+            className="p-2 w-full bg-transparent focus:outline-none"
+            type="text"
+            placeholder="add a new task"
+            value={newTask}
+            autoComplete="off"
+            onChange={handleInputChange}
+          />
+        </form>
 
-      {/* tags */}
-      <div className="flex items-center justify-between px-2">
-        <div>
-          <div className=" inline-flex gap-2 bg-amber-3000 p-2 m-2">
-            <p>tag1</p>
-            <button>{crossIcon}</button>
+        {/* tags */}
+        <div className="flex items-center justify-between px-2">
+          <div>
+            <div className=" inline-flex gap-2 bg-amber-3000 p-2 m-2">
+              <p>tag1</p>
+              <button>{crossIcon}</button>
+            </div>
+            <div className=" inline-flex gap-2 bg-rose-3000 p-2 m-2">
+              <p>tag1</p>
+              <button>{crossIcon}</button>
+            </div>
           </div>
-          <div className=" inline-flex gap-2 bg-rose-3000 p-2 m-2">
-            <p>tag1</p>
-            <button>{crossIcon}</button>
+
+          <div className="relative flex gap-2">
+            <button className=" flex">{filterIcon} filter tags</button>
+            <button onClick={openDotMenu}>{dotsVertical}</button>
+            {isDotMenu && (
+              <Modal isOpen={isDotMenu} onClose={closeDotMenu}>
+                <div className="absolute flex justify-center w-40 top-8 right-0 py-4 rounded  bg-red-200">
+                  <button
+                    onClick={handleDeleteAll}
+                    className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
+                  >
+                    Delete All Tasks
+                  </button>
+                </div>
+              </Modal>
+            )}
           </div>
         </div>
 
-        <div className="relative flex gap-2">
-          <button className=" flex">{filterIcon} filter tags</button>
-          <button onClick={openDotMenu}>{dotsVertical}</button>
-          {isDotMenu && (
-            <Modal isOpen={isDotMenu} onClose={closeDotMenu}>
-              <div className="absolute flex justify-center w-40 top-8 right-0 py-4 rounded  bg-red-200">
-                <button
-                  onClick={handleDeleteAll}
-                  className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-                >
-                  Delete All Tasks
-                </button>
-              </div>
-            </Modal>
-          )}
-        </div>
+        {/* task List */}
+        <main className="">
+          {taskList.map((task, index) => (
+            <Task
+              key={index}
+              task={task}
+              index={index}
+              handleDelete={handleDelete}
+              handleToggle={handleToggle}
+              handleEdit={handleEdit}
+              openSideModal={openSideModal}
+            />
+          ))}
+        </main>
       </div>
 
-      <main className="">
-        {taskList.map((task, index) => (
-          <Task
-            key={index}
-            task={task}
-            index={index}
-            // handleDelete={handleDelete}
-            // handleDelete={() => handleDelete(task.id)}
-            handleDelete={handleDelete}
-            handleToggle={handleToggle}
-            handleEdit={handleEdit}
-          />
-        ))}
-      </main>
+      <div className="bg-purple-400 relative flex-grow min-w-[400px]">
+        <Modal
+          isOpen={isSideModal}
+          onClose={closeSideModal}
+          fullScreen={isScreenBelowXL}
+        >
+          <p>Open a Task!</p>
+          <button onClick={closeSideModal}>close</button>
+        </Modal>
+      </div>
 
       <ToastContainer
         autoClose={2500}

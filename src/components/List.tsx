@@ -16,10 +16,24 @@ function List() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const trimmedListName = newListItem.trim().toLowerCase();
+
+    if (trimmedListName === "") {
+      return;
+    }
+
+    if (list.some((l) => l === trimmedListName)) {
+      return;
+    }
 
     setList([...list, newListItem]);
     setLocalStorageItem("list", [...list, newListItem]);
     setNewListItem("");
+  };
+
+  const handleClearAll = () => {
+    setList([]);
+    setLocalStorageItem("list", []);
   };
 
   return (
@@ -46,6 +60,10 @@ function List() {
           name="list-name"
         />
       </form>
+
+      <button onClick={handleClearAll} className="bg-red-100  p-2 mt-2">
+        clear all lists
+      </button>
     </>
   );
 }

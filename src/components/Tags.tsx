@@ -32,7 +32,18 @@ function Tags() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const newTags = [...tags, newTag];
+
+    const trimmedTagName = newTag.trim().toLowerCase();
+
+    if (trimmedTagName === "") {
+      return;
+    }
+
+    if (tags.some((tag) => tag === trimmedTagName)) {
+      return;
+    }
+
+    const newTags = [...tags, trimmedTagName];
     setTags(newTags);
     setNewTag("");
     setLocalStorageItem("tags", newTags);

@@ -5,16 +5,14 @@ import TaskLIstControl from "../components/TaskLIstControl";
 export default function Home() {
   return (
     <>
-      <div className="h-full min-h-screen w-full flex flex-col md:flex-row md:justify-between bg-background text-text p-3">
-        <div className="lg:w-2/6">
+      <div className="flex flex-col md:flex-row bg-green-500 justify-start">
+        <div className="md:w-1/3 md:max-w-md">
           <NavBar />
         </div>
 
-        <div className="lg:w-full md:w-2/3 xl:2/6">
+        <div className="md:w-2/3 bg-pink-300 flex-grow">
           <TaskLIstControl />
         </div>
-
-        <div className="hidden xl:flex bg-accent w-4/6"></div>
       </div>
     </>
   );

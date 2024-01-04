@@ -25,6 +25,7 @@ interface TaskProps {
   handleToggle: (ID: string) => void;
   handleDelete: (ID: string) => void;
   handleEdit: (ID: string, task: TaskType) => void;
+  openSideModal: () => void;
 }
 
 interface TaskFormProps {

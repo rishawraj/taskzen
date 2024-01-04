@@ -4,7 +4,7 @@ function UpcomingTask() {
   return (
     <>
       <NavBar />
-      <div>UpcomingTask</div>;
+      <div>UpcomingTask</div>
     </>
   );
 }
