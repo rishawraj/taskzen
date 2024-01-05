@@ -1,3 +1,8 @@
+interface TagType {
+  id: string;
+  name: string;
+}
+
 interface TaskType {
   id: string;
   title: string;
@@ -5,11 +10,12 @@ interface TaskType {
   description?: string;
   selectedListItem?: string;
   dueDate?: string;
-  tags?: string[];
+  tags?: TagType[];
   subTasks?: SubTaskType[];
 }
 
 interface SubTaskType {
+  id: string;
   title: string;
   completed: boolean;
 }
@@ -25,12 +31,14 @@ interface TaskProps {
   handleToggle: (ID: string) => void;
   handleDelete: (ID: string) => void;
   handleEdit: (ID: string, task: TaskType) => void;
+  // openSideModal: (ID: string) => void;
   openSideModal: () => void;
+  updateCurrTask: (ID: string) => void;
 }
 
 interface TaskFormProps {
   index: number;
-  task: TaskType;
+  task: TaskType | undefined;
   handleEdit: (ID: string, task: TaskType) => void;
   closeModal: () => void;
 }

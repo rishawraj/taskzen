@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getLocalStorageItem } from "../utils/localStorage";
 import { crossIcon } from "../assets/icons";
+import { v4 as uuidv4 } from "uuid";
 
 function TaskDetailsForm({
   index,
@@ -8,6 +9,7 @@ function TaskDetailsForm({
   handleEdit,
   closeModal,
 }: TaskFormProps) {
+  if (!task) return;
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
   const [list, setList] = useState<string[]>([]);
@@ -16,23 +18,20 @@ function TaskDetailsForm({
   );
   const [dueDate, setDueDate] = useState(task.dueDate);
 
-  const [taskTags, setTaskTags] = useState<string[]>(task.tags || []);
+  const [taskTags, setTaskTags] = useState<TagType[]>(task.tags || []);
 
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<TagType[]>([]);
   const [tagListOpen, setTagLisOpen] = useState(false);
 
   const [subTaskList, setSubTaskList] = useState(task.subTasks || []);
 
-  const [newSubTask, setNewSubTask] = useState<SubTaskType>({
-    title: "",
-    completed: false,
-  });
+  const [newSubTaskText, setNewSubTaskText] = useState("");
 
   useEffect(() => {
     const localList = getLocalStorageItem<string[]>("list") || [];
     setList(localList);
 
-    const localTags = getLocalStorageItem<string[]>("tags");
+    const localTags = getLocalStorageItem<TagType[]>("tags");
     setTags(localTags);
   }, []);
 
@@ -63,22 +62,37 @@ function TaskDetailsForm({
   const handleSubTaskFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!newSubTask.title) return;
+    if (!newSubTaskText) return;
+
+    const t = subTaskList?.find((t) => t.title === newSubTaskText);
+    if (t !== undefined) {
+      return;
+    }
+
+    const newSubTask = {
+      id: uuidv4(),
+      title: newSubTaskText,
+      completed: false,
+    };
 
     setSubTaskList([newSubTask, ...subTaskList]);
-    setNewSubTask({ title: "", completed: false });
+    setNewSubTaskText("");
   };
 
-  const handleSubTaskToggle = (index: number) => {
-    const localTaskList = getLocalStorageItem<TaskType[]>("tasks") || [];
+  const handleSubTaskToggle = (ID: string) => {
+    const newSubTaskList = [...subTaskList];
 
-    const newSubTaskList = [...localTaskList];
+    const subTaskIndex = newSubTaskList.findIndex((subT) => subT.id === ID);
 
-    newSubTaskList[index].completed = !newSubTaskList[index].completed;
+    if (subTaskIndex === -1) return;
 
-    setSubTaskList(newSubTaskList);
+    const updatedSubTask = { ...newSubTaskList[subTaskIndex] };
 
-    const sortedTasks = [...subTaskList].sort((a, b) => {
+    updatedSubTask.completed = !updatedSubTask.completed;
+
+    newSubTaskList[subTaskIndex] = updatedSubTask;
+
+    const sortedTasks = [...newSubTaskList].sort((a, b) => {
       if (a.completed && !b.completed) return 1;
       if (!a.completed && b.completed) return -1;
       return 0;
@@ -87,14 +101,22 @@ function TaskDetailsForm({
     setSubTaskList(sortedTasks);
   };
 
-  const handleSubTaskDelete = (index: number) => {
-    const updatedSubTaskList = [...subTaskList];
-    updatedSubTaskList.splice(index, 1);
+  const handleSubTaskDelete = (ID: string) => {
+    const index = subTaskList.findIndex((subT) => subT.id === ID);
+
+    if (index === -1) return;
+
+    const updatedSubTaskList = [
+      ...subTaskList.slice(0, index),
+      ...subTaskList.slice(index + 1),
+    ];
+
     setSubTaskList(updatedSubTaskList);
   };
 
   const handleSubmit = () => {
-    console.log("handleSubmit called from taskform.tsx");
+    // console.log("handleSubmit called from taskform.tsx");
+
     const updatedTask: TaskType = {
       id: task.id,
       title: title,
@@ -116,21 +138,26 @@ function TaskDetailsForm({
     setSelectedListItem(e.target.value);
   };
 
-  const handleAddTags = (index: number) => {
+  const handleAddTags = (ID: string) => {
     if (taskTags.length === tags.length) return;
 
-    const newTag = tags[index];
-    const indexOfTag = taskTags.indexOf(newTag);
+    const tg = tags.find((t) => t.id === ID);
+    if (!tg) return;
 
-    if (indexOfTag >= 0) return;
-
-    setTaskTags([...taskTags, tags[index]]);
+    setTaskTags([...taskTags, tg]);
   };
 
-  const handleDeleteTaskTags = (index: number) => {
-    const newTaskTags = [...taskTags];
-    newTaskTags.splice(index, 1);
-    setTaskTags(newTaskTags);
+  const handleDeleteTaskTags = (ID: string) => {
+    const index = taskTags.findIndex((t) => t.id === ID);
+
+    if (index === -1) return;
+
+    const newTaskTagList = [
+      ...taskTags.slice(0, index),
+      ...taskTags.slice(index + 1),
+    ];
+
+    setTaskTags(newTaskTagList);
   };
 
   return (
@@ -190,13 +217,13 @@ function TaskDetailsForm({
           {/* tags */}
           <label>Tags</label>
           <div>
-            {taskTags.map((tag, i) => (
+            {taskTags.map((tag) => (
               <span
-                key={i}
+                key={tag.id}
                 className="inline-flex flex-wrap gap-2 p-2 bg-amber-300 mr-2"
               >
-                <p>{tag}</p>
-                <button onClick={() => handleDeleteTaskTags(index)}>
+                <p>{tag.name}</p>
+                <button onClick={() => handleDeleteTaskTags(tag.id)}>
                   {crossIcon}
                 </button>
               </span>
@@ -206,13 +233,13 @@ function TaskDetailsForm({
           <div className="flex gap-2 flex-wrap">
             {tagListOpen &&
               tags &&
-              tags.map((tag, i) => (
+              tags.map((tag) => (
                 <button
-                  onClick={() => handleAddTags(i)}
+                  onClick={() => handleAddTags(tag.id)}
                   className="py-2 bg-lime-300 min-w-[70px]"
-                  key={i}
+                  key={tag.id}
                 >
-                  {tag}
+                  {tag.name}
                 </button>
               ))}
             <button
@@ -246,11 +273,9 @@ function TaskDetailsForm({
               className="p-2 w-full bg-transparent focus:outline-none text-text"
               type="text"
               placeholder="Add New Subtask"
-              value={newSubTask?.title}
+              value={newSubTaskText}
               autoComplete="off"
-              onChange={(e) =>
-                setNewSubTask({ ...newSubTask, title: e.target.value })
-              }
+              onChange={(e) => setNewSubTaskText(e.target.value)}
             />
           </form>
 
@@ -265,11 +290,11 @@ function TaskDetailsForm({
                   id={i.toString()}
                   type="checkbox"
                   checked={subTask.completed}
-                  onChange={() => handleSubTaskToggle(index)}
+                  onChange={() => handleSubTaskToggle(subTask.id)}
                 />
                 <p>{subTask.title}</p>
               </div>
-              <button onClick={() => handleSubTaskDelete(index)}>
+              <button onClick={() => handleSubTaskDelete(subTask.id)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"

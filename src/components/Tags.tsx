@@ -5,14 +5,20 @@ import {
   setLocalStorageItem,
 } from "../utils/localStorage";
 import { crossIcon, plusIcon } from "../assets/icons";
+import { v4 as uuidv4 } from "uuid";
+
+interface TagType {
+  id: string;
+  name: string;
+}
 
 function Tags() {
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState("");
+  const [tags, setTags] = useState<TagType[]>([]);
+  const [newTagName, setNewTagName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const localTags = getLocalStorageItem<string[]>("tags") || [];
+    const localTags = getLocalStorageItem<TagType[]>("tags") || [];
     setTags(localTags);
   }, []);
 
@@ -33,19 +39,24 @@ function Tags() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const trimmedTagName = newTag.trim().toLowerCase();
+    const trimmedTagName = newTagName.trim().toLowerCase();
 
     if (trimmedTagName === "") {
       return;
     }
 
-    if (tags.some((tag) => tag === trimmedTagName)) {
-      return;
-    }
+    // if (tags.some((tag) => tag === trimmedTagName)) {
+    //   return;
+    // }
 
-    const newTags = [...tags, trimmedTagName];
+    const newTag: TagType = {
+      id: uuidv4(),
+      name: trimmedTagName,
+    };
+
+    const newTags = [...tags, newTag];
     setTags(newTags);
-    setNewTag("");
+    setNewTagName("");
     setLocalStorageItem("tags", newTags);
   };
 
@@ -59,12 +70,11 @@ function Tags() {
       <h1 className="font-bold">Tags:</h1>
 
       <div className="inline-flex gap-2 flex-wrap">
-        {/* {tags.map((tag, index) => (
-          <span key={index} className="flex bg-amber-1000 p-2 gap-2">
-            <p>{tag} </p>
-            <button onClick={() => handleTagDelete(index)}>{crossIcon}</button>
-          </span>
-        ))} */}
+        {tags.map((tag) => (
+          <button key={tag.id} className="flex bg-amber-1000 p-2 gap-2">
+            <p>{tag.name} </p>
+          </button>
+        ))}
         <button className="flex p-2" onClick={handleAddTag}>
           {plusIcon} Create Tags
         </button>
@@ -80,7 +90,7 @@ function Tags() {
           <div className="inline-flex gap-2 flex-wrap">
             {tags.map((tag, index) => (
               <span key={index} className="flex bg-amber-1000 p-2 gap-2">
-                <p>{tag} </p>
+                <p>{tag.name}</p>
                 <button onClick={() => handleTagDelete(index)}>
                   {crossIcon}
                 </button>
@@ -94,8 +104,8 @@ function Tags() {
               type="text"
               name="add-tag"
               className="bg-transparent outline-none"
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
             />
           </form>
 

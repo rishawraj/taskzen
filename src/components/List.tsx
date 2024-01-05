@@ -16,13 +16,16 @@ function List() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const trimmedListName = newListItem.trim().toLowerCase();
 
     if (trimmedListName === "") {
       return;
     }
 
-    if (list.some((l) => l === trimmedListName)) {
+    const exists = list.find((l) => l === trimmedListName);
+
+    if (exists !== undefined) {
       return;
     }
 

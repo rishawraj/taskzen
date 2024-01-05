@@ -23,23 +23,28 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
   );
   const [taskList, setTaskList] = useState<TaskType[]>([]);
   const [newTask, setNewTask] = useState("");
-  const { isDarkMode } = useDarkMode();
-  const [isDotMenu, setIsDotMenu] = useState(false);
 
+  const { isDarkMode } = useDarkMode();
+
+  const [isDotMenu, setIsDotMenu] = useState(false);
   const [isSideModal, setIsSideModal] = useState(false);
 
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
   const [isScreenBelowXL, setIsScreenBelowXL] = useState(
     window.innerWidth < 1280
   );
+  const [trigger, setTrigger] = useState(false);
+  const [count, setCount] = useState(0);
+  const [currTask, setCurrTask] = useState<TaskType>();
+
+  const updateCurrTask = (ID: string) => {
+    const tasks = getLocalStorageItem<TaskType[]>("tasks");
+    const task = tasks.find((t) => t.id === ID);
+    setCurrTask(task);
+    setCount((prevCount) => prevCount + 1);
+  };
 
   const closeSideModal = () => setIsSideModal(false);
   const openSideModal = () => setIsSideModal(true);
-
-  const [trigger, setTrigger] = useState(false);
 
   const closeDotMenu = () => setIsDotMenu(false);
   const openDotMenu = () => setIsDotMenu(true);
@@ -47,12 +52,6 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
   useEffect(() => {
     const handleResize = () => {
       const newWidth = window.innerWidth;
-      setWindowSize({
-        width: newWidth,
-        height: window.innerHeight,
-      });
-
-      // Update the state based on the new window width
       setIsScreenBelowXL(newWidth < 1280);
     };
 
@@ -211,7 +210,7 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
           </button>
           <input
             name="task"
-            className="p-2 w-full bg-transparent focus:outline-none"
+            className="p-2 w-full bg-transparent focus:outline-none placeholder:text-text"
             type="text"
             placeholder="add a new task"
             value={newTask}
@@ -237,7 +236,11 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
             <button className=" flex">{filterIcon} filter tags</button>
             <button onClick={openDotMenu}>{dotsVertical}</button>
             {isDotMenu && (
-              <Modal isOpen={isDotMenu} onClose={closeDotMenu}>
+              <Modal
+                isOpen={isDotMenu}
+                onClose={closeDotMenu}
+                fullScreen={false}
+              >
                 <div className="absolute flex justify-center w-40 top-8 right-0 py-4 rounded  bg-red-200">
                   <button
                     onClick={handleDeleteAll}
@@ -262,20 +265,33 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
               handleToggle={handleToggle}
               handleEdit={handleEdit}
               openSideModal={openSideModal}
+              updateCurrTask={updateCurrTask}
             />
           ))}
         </main>
       </div>
 
       <div className="bg-purple-400 relative flex-grow min-w-[400px]">
-        <Modal
-          isOpen={isSideModal}
-          onClose={closeSideModal}
-          fullScreen={isScreenBelowXL}
-        >
-          <p>Open a Task!</p>
-          <button onClick={closeSideModal}>close</button>
-        </Modal>
+        {isSideModal ? (
+          <Modal
+            isOpen={isSideModal}
+            onClose={closeSideModal}
+            fullScreen={isScreenBelowXL}
+          >
+            <TaskDetailsForm
+              // new element
+              key={count}
+              closeModal={closeSideModal}
+              handleEdit={handleEdit}
+              task={currTask}
+              index={0}
+            />
+          </Modal>
+        ) : (
+          <div className="hidden xl:block">
+            <h2>Please open a task!</h2>
+          </div>
+        )}
       </div>
 
       <ToastContainer

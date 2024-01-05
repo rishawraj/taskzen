@@ -1,4 +1,15 @@
-function Task({ index, task, handleToggle, openSideModal }: TaskProps) {
+function Task({
+  index,
+  task,
+  handleToggle,
+  openSideModal,
+  updateCurrTask,
+}: TaskProps) {
+  const handleSideModalOpen = () => {
+    updateCurrTask(task.id);
+    openSideModal();
+  };
+
   return (
     <>
       <div>
@@ -23,7 +34,7 @@ function Task({ index, task, handleToggle, openSideModal }: TaskProps) {
             )}
           </div>
 
-          <button onClick={openSideModal}>
+          <button onClick={handleSideModalOpen}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
