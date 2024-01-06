@@ -29,8 +29,10 @@ function Tags() {
     openModal();
   };
 
-  const handleTagDelete = (index: number) => {
+  const handleTagDelete = (ID: string) => {
     const newTags = [...tags];
+    const index = newTags.findIndex((t) => t.id === ID);
+
     newTags.splice(index, 1);
     setTags(newTags);
     setLocalStorageItem("tags", newTags);
@@ -45,9 +47,10 @@ function Tags() {
       return;
     }
 
-    // if (tags.some((tag) => tag === trimmedTagName)) {
-    //   return;
-    // }
+    const index = tags.findIndex((t) => t.name === trimmedTagName);
+    if (index !== -1) {
+      return;
+    }
 
     const newTag: TagType = {
       id: uuidv4(),
@@ -91,7 +94,7 @@ function Tags() {
             {tags.map((tag, index) => (
               <span key={index} className="flex bg-amber-1000 p-2 gap-2">
                 <p>{tag.name}</p>
-                <button onClick={() => handleTagDelete(index)}>
+                <button onClick={() => handleTagDelete(tag.id)}>
                   {crossIcon}
                 </button>
               </span>

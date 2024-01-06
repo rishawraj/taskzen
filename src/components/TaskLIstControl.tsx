@@ -15,9 +15,10 @@ import TaskDetailsForm from "./TaskDetailsForm";
 
 interface TaskLIstControlProps {
   listName?: string;
+  taskDate?: "UPCOMING" | "TODAY";
 }
 
-function TaskLIstControl({ listName }: TaskLIstControlProps) {
+function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
   const [originalTaskList, setOrginalTaskList] = useState<TaskType[]>(
     getLocalStorageItem<TaskType[]>("tasks") || []
   );
@@ -47,7 +48,8 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
   const openSideModal = () => setIsSideModal(true);
 
   const closeDotMenu = () => setIsDotMenu(false);
-  const openDotMenu = () => setIsDotMenu(true);
+  // const openDotMenu = () => setIsDotMenu(true);
+  const toggleDotMenu = () => setIsDotMenu((prev) => !prev);
 
   useEffect(() => {
     const handleResize = () => {
@@ -62,13 +64,39 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
     };
   }, []);
 
-  useEffect(() => {
-    const filteredTasks = listName
-      ? originalTaskList.filter((task) => task.selectedListItem === listName)
-      : originalTaskList;
+  const dateToday = () => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed, so add 1
+    const currentDate = String(today.getDate()).padStart(2, "0");
 
-    setTaskList(filteredTasks);
-  }, [listName, trigger]);
+    // Display the current date in the desired format
+    return currentYear + "-" + currentMonth + "-" + currentDate;
+  };
+
+  const filteredTasks = () => {
+    let taskList = originalTaskList;
+
+    if (listName) {
+      taskList = originalTaskList.filter(
+        (task) => task.selectedListItem === listName
+      );
+    } else if (taskDate === "UPCOMING") {
+      taskList = originalTaskList.filter((task) => task.dueDate !== undefined);
+    } else if (taskDate === "TODAY") {
+      console.log();
+      taskList = originalTaskList.filter((task) => {
+        console.log(task.dueDate, dateToday());
+        return task.dueDate === dateToday();
+      });
+    }
+
+    return taskList;
+  };
+
+  useEffect(() => {
+    setTaskList(filteredTasks());
+  }, [listName, taskDate, trigger]);
 
   const handleDelete = (ID: string) => {
     const newOriginalTaskList = originalTaskList.filter(
@@ -193,8 +221,8 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
   };
 
   return (
-    <div className="flex flex-col xl:flex-row ">
-      <div className="flex-grow p-5 mt-5">
+    <div className="flex flex-col xl:flex-row h-full ">
+      <div className="flex-1 bg-amber-200 h-full p-5">
         {/* form */}
         <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
           <button className="p-2" type="submit">
@@ -234,7 +262,7 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
 
           <div className="relative flex gap-2">
             <button className=" flex">{filterIcon} filter tags</button>
-            <button onClick={openDotMenu}>{dotsVertical}</button>
+            <button onClick={toggleDotMenu}>{dotsVertical}</button>
             {isDotMenu && (
               <Modal
                 isOpen={isDotMenu}
@@ -271,7 +299,10 @@ function TaskLIstControl({ listName }: TaskLIstControlProps) {
         </main>
       </div>
 
-      <div className="bg-purple-400 relative flex-grow min-w-[400px]">
+      <div
+        className="flex-1 bg-yellow-400 h-screen sticky top-0 px-10"
+        // style={{ position: "sticky", top: 0 }}
+      >
         {isSideModal ? (
           <Modal
             isOpen={isSideModal}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import List from "./List";
 import Tags from "./Tags";
 // import { DarkModeButton } from "./DarkModeButton";
@@ -87,20 +87,28 @@ function NavBar() {
           <h2 className=" font-bold">tasks</h2>
 
           <div className="flex flex-col">
-            <Link to="/upcoming">Upcoming</Link>
-            <Link to="/today">Today</Link>
+            <NavLink
+              className={({ isActive }) => (isActive ? "bg-green-300" : "")}
+              to="/upcoming"
+            >
+              Upcomingg
+            </NavLink>
+            <NavLink
+              className={({ isActive }) => (isActive ? "bg-green-300" : "")}
+              to="/today"
+            >
+              Todayy
+            </NavLink>
           </div>
 
           <List />
+
           <Tags />
 
           <Link className="font-bold" to="/login">
             Login
           </Link>
 
-          <br />
-
-          {/* <DarkModeButton /> */}
           <button onClick={toggleTheme}>{themeIcon}</button>
         </div>
       </div>
@@ -133,23 +141,29 @@ function NavBar() {
           <div className="w-2/3 p-2 mt-3 ">
             <h2 className=" font-bold">tasks</h2>
             <div className="flex flex-col">
-              <Link to="/upcoming">Upcoming</Link>
-              <Link to="/today">Today</Link>
+              {/* <Link to="/upcoming">Upcoming</Link>
+              <Link to="/today">Today</Link> */}
+
+              <NavLink
+                className={({ isActive }) => (isActive ? "bg-green-300" : "")}
+                to="/upcoming"
+              >
+                Upcomingg
+              </NavLink>
+              <NavLink
+                className={({ isActive }) => (isActive ? "bg-green-300" : "")}
+                to="/today"
+              >
+                Todayy
+              </NavLink>
             </div>
-            <br />
             <List />
 
-            <br />
-
             <Tags />
-            <br />
-            {/* <br /> */}
 
             <Link className="font-bold" to="/login">
               Login
             </Link>
-
-            <br />
 
             <button onClick={toggleTheme}>{themeIcon}</button>
           </div>

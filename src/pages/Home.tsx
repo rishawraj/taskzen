@@ -5,8 +5,8 @@ import TaskLIstControl from "../components/TaskLIstControl";
 export default function Home() {
   return (
     <>
-      <div className="flex flex-col md:flex-row bg-green-500 justify-start h-screen">
-        <div className="md:w-1/3 md:max-w-md">
+      <div className="flex flex-col md:flex-row bg-background justify-start h-full min-h-screen">
+        <div className="md:w-1/3 md:max-w-sm sticky top-0 h-full">
           <NavBar />
         </div>
 
