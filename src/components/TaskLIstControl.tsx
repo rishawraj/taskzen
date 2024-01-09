@@ -5,14 +5,16 @@ import {
 } from "../utils/localStorage";
 import Task from "./Task";
 import { ToastContainer, toast } from "react-toastify";
-import { crossIcon, dotsVertical, filterIcon } from "../assets/icons";
+import { crossIcon, dotsVerticalIcon, filterIcon } from "../assets/icons";
 
 import { useDarkMode } from "../Context/DarkModeContext";
 import Modal from "./Modal";
 
 import { v4 as uuidv4 } from "uuid";
 import TaskDetailsForm from "./TaskDetailsForm";
+import Tags from "./Tags";
 
+import { TaskType, TagType } from "../types/types";
 interface TaskLIstControlProps {
   listName?: string;
   taskDate?: "UPCOMING" | "TODAY";
@@ -33,9 +35,36 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
   const [isScreenBelowXL, setIsScreenBelowXL] = useState(
     window.innerWidth < 1280
   );
+
+  const [isEditTagMenu, setIsEditTagMenu] = useState(false);
+  const closeEditMenu = () => setIsEditTagMenu(false);
+  const openEditMenu = () => setIsEditTagMenu(true);
+
   const [trigger, setTrigger] = useState(false);
   const [count, setCount] = useState(0);
   const [currTask, setCurrTask] = useState<TaskType>();
+
+  // const [filterTagsList, setFilterTagsList];
+
+  const [appliedTags, setAppliedTags] = useState<TagType[]>(
+    getLocalStorageItem<TagType[]>("appliedTags") || []
+  );
+
+  // const [taglist, setTagList];
+
+  const [availableTags, setAvailableTags] = useState(
+    getLocalStorageItem<TagType[]>("tags") || []
+  );
+
+  useEffect(() => {
+    setAvailableTags(getLocalStorageItem<TagType[]>("tags"));
+    setAppliedTags(getLocalStorageItem<TagType[]>("appliedTags"));
+  }, [isEditTagMenu]);
+
+  const [isFilterTag, setIsFilterTag] = useState(false);
+  // const openFilterTag = () => setIsFilterTag(true);
+  const closeFilterTag = () => setIsFilterTag(false);
+  const toggleFilterTag = () => setIsFilterTag((prev) => !prev);
 
   const updateCurrTask = (ID: string) => {
     const tasks = getLocalStorageItem<TaskType[]>("tasks");
@@ -74,6 +103,35 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
     return currentYear + "-" + currentMonth + "-" + currentDate;
   };
 
+  const filterTaskListByAppliedTags = (
+    taskList: TaskType[],
+    tagList: TagType[]
+  ): TaskType[] => {
+    if (tagList.length === 0) {
+      return taskList;
+    }
+    const filteredTaskList: TaskType[] = [];
+
+    for (const task of taskList) {
+      if (task.tags) {
+        let hasAllTags = true;
+
+        for (const tag of tagList) {
+          const tagPresent = task.tags.some((taskTag) => taskTag.id === tag.id);
+
+          if (!tagPresent) {
+            hasAllTags = false;
+            break;
+          }
+        }
+        if (hasAllTags) {
+          filteredTaskList.push(task);
+        }
+      }
+    }
+    return filteredTaskList;
+  };
+
   const filteredTasks = () => {
     let taskList = originalTaskList;
 
@@ -91,12 +149,16 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
       });
     }
 
-    return taskList;
+    const filteredTasks = filterTaskListByAppliedTags(taskList, appliedTags);
+    console.log(filteredTasks);
+
+    // return taskList;
+    return filteredTasks;
   };
 
   useEffect(() => {
     setTaskList(filteredTasks());
-  }, [listName, taskDate, trigger]);
+  }, [listName, taskDate, trigger, appliedTags]);
 
   const handleDelete = (ID: string) => {
     const newOriginalTaskList = originalTaskList.filter(
@@ -220,9 +282,53 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
     closeDotMenu();
   };
 
+  const handleEditTagsClick = () => {
+    openEditMenu();
+    closeDotMenu();
+  };
+
+  const handleTagClick = (ID: string) => {
+    const localTags = getLocalStorageItem<TagType[]>("tags") || [];
+
+    const tag = localTags.find((t) => t.id === ID);
+
+    if (!tag) {
+      return;
+    }
+
+    const index = appliedTags.findIndex((tag) => tag.id === ID);
+
+    if (index !== -1) return;
+
+    setAppliedTags([tag, ...appliedTags]);
+    setLocalStorageItem("appliedTags", [tag, ...appliedTags]);
+  };
+
+  const handleTagClear = (ID: string) => {
+    const localFilteredTags =
+      getLocalStorageItem<TagType[]>("appliedTags") || [];
+    const index = localFilteredTags.findIndex((tag) => tag.id === ID);
+
+    if (index === -1) {
+      return;
+    }
+
+    const newAppliedTags = [
+      ...appliedTags.slice(0, index),
+      ...appliedTags.slice(index + 1),
+    ];
+    setAppliedTags(newAppliedTags);
+    setLocalStorageItem("appliedTags", newAppliedTags);
+  };
+
+  const clearAllAppliedTags = () => {
+    setAppliedTags([]);
+    setLocalStorageItem("appliedTags", []);
+  };
+
   return (
     <div className="flex flex-col xl:flex-row h-full ">
-      <div className="flex-1 bg-amber-200 h-full p-5">
+      <div className="flex-1 bg-amber-2000 h-full p-5">
         {/* form */}
         <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
           <button className="p-2" type="submit">
@@ -248,39 +354,94 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
         </form>
 
         {/* tags */}
-        <div className="flex items-center justify-between px-2">
+        <div className="flex items-center justify-between">
           <div>
-            <div className=" inline-flex gap-2 bg-amber-3000 p-2 m-2">
-              <p>tag1</p>
-              <button>{crossIcon}</button>
-            </div>
-            <div className=" inline-flex gap-2 bg-rose-3000 p-2 m-2">
-              <p>tag1</p>
-              <button>{crossIcon}</button>
-            </div>
+            {appliedTags.map((tag) => (
+              <div
+                key={tag.id}
+                className=" inline-flex gap-2 bg-amber-3000 p-2 m-2"
+              >
+                <p>{tag.name}</p>
+                <button onClick={() => handleTagClear(tag.id)}>
+                  {crossIcon}
+                </button>
+              </div>
+            ))}
           </div>
 
-          <div className="relative flex gap-2">
-            <button className=" flex">{filterIcon} filter tags</button>
-            <button onClick={toggleDotMenu}>{dotsVertical}</button>
+          <div className="relative flex">
+            <button onClick={toggleFilterTag} className="flex">
+              {filterIcon} filter tags
+            </button>
+
+            <button onClick={toggleDotMenu}>{dotsVerticalIcon}</button>
             {isDotMenu && (
               <Modal
                 isOpen={isDotMenu}
                 onClose={closeDotMenu}
                 fullScreen={false}
+                closeOnOutsideClick={true}
               >
-                <div className="absolute flex justify-center w-40 top-8 right-0 py-4 rounded  bg-red-200">
+                <div className="absolute w-full top-10 left-0 z-10 flex flex-col p-2 gap-2 bg-background">
+                  <button onClick={clearAllAppliedTags}>clear all tags</button>
                   <button
                     onClick={handleDeleteAll}
-                    className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
+                    className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600"
                   >
-                    Delete All Tasks
+                    {/* Delete All Tasks */}
+                    clear tasks
+                  </button>
+                  <button
+                    onClick={handleEditTagsClick}
+                    className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
+                  >
+                    edit tags
                   </button>
                 </div>
               </Modal>
             )}
           </div>
+
+          {isEditTagMenu && (
+            <Modal
+              isOpen={isEditTagMenu}
+              onClose={closeEditMenu}
+              fullScreen={true}
+              closeOnOutsideClick={true}
+            >
+              <div className="">
+                <div>
+                  <h3>Edit Tags</h3>
+                  <button onClick={closeEditMenu}>{crossIcon}</button>
+                </div>
+
+                {/*  */}
+                <Tags />
+              </div>
+            </Modal>
+          )}
         </div>
+
+        {isFilterTag && (
+          <div className="w-full h-10 bg-red-400 flex justify-between ">
+            <div className="flex gap-2">
+              {availableTags.map((tag) => (
+                <button
+                  key={tag.id}
+                  onClick={() => handleTagClick(tag.id)}
+                  className="bg-amber-200 p-2"
+                >
+                  {tag.name}
+                </button>
+              ))}
+            </div>
+            <button onClick={closeFilterTag}>{crossIcon}</button>
+          </div>
+        )}
+
+        {/* {availableTags.map((t) => (
+          <p>{t.name}</p>
+        ))} */}
 
         {/* task List */}
         <main className="">
@@ -299,18 +460,16 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
         </main>
       </div>
 
-      <div
-        className="flex-1 bg-yellow-400 h-screen sticky top-0 px-10"
-        // style={{ position: "sticky", top: 0 }}
-      >
+      <div className="flex-1 h-screen sticky top-0 px-10 bg-yellow-200 z-0">
         {isSideModal ? (
           <Modal
             isOpen={isSideModal}
             onClose={closeSideModal}
             fullScreen={isScreenBelowXL}
+            closeOnOutsideClick={isScreenBelowXL}
           >
             <TaskDetailsForm
-              // new element
+              // treat it like a new element
               key={count}
               closeModal={closeSideModal}
               handleEdit={handleEdit}
@@ -319,7 +478,7 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
             />
           </Modal>
         ) : (
-          <div className="hidden xl:block">
+          <div className="hidden xl:flex bg-pink-400">
             <h2>Please open a task!</h2>
           </div>
         )}

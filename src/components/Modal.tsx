@@ -5,6 +5,7 @@ interface ModalPropType {
   children?: ReactNode;
   onClose: () => void;
   fullScreen?: boolean;
+  closeOnOutsideClick?: boolean;
 }
 
 const Modal = ({
@@ -12,12 +13,14 @@ const Modal = ({
   children,
   onClose,
   fullScreen = true,
+  closeOnOutsideClick = false,
 }: ModalPropType) => {
   const modalContentRef: RefObject<HTMLDivElement> = useRef(null);
 
   useEffect(() => {
     const handleClickOuside = (e: MouseEvent) => {
       if (
+        closeOnOutsideClick &&
         modalContentRef.current &&
         !modalContentRef.current.contains(e.target as Node)
       ) {
@@ -34,16 +37,18 @@ const Modal = ({
     }
   }, [isOpen, onClose]);
 
+  // useEffect(() => {}, []);
+
   if (!isOpen) return null;
 
   return fullScreen ? (
-    <div className="fixed bg-black/25 inset-0 flex items-center justify-center">
-      <div className="w-2/3 md:w-1/3 bg-red-500" ref={modalContentRef}>
+    <div className="fixed top-0 bg-black/25 bg-lime-5000 inset-0 flex items-center justify-center z-50">
+      <div className="bg-red-300" ref={modalContentRef}>
         {children}
       </div>
     </div>
   ) : (
-    <div>{children}</div>
+    <div ref={modalContentRef}>{children}</div>
   );
 };
 

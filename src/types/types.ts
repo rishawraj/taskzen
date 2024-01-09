@@ -42,3 +42,4 @@ interface TaskFormProps {
   handleEdit: (ID: string, task: TaskType) => void;
   closeModal: () => void;
 }
+export { TaskType, TagType };

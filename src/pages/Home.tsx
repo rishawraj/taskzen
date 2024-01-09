@@ -11,6 +11,7 @@ export default function Home() {
         </div>
 
         <div className="md:w-2/3 bg-pink-300 flex-grow">
+          <h2 className="text-4xl">Home</h2>
           <TaskLIstControl />
         </div>
       </div>
