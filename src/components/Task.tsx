@@ -1,3 +1,5 @@
+import { TaskProps } from "../types/types";
+
 function Task({
   index,
   task,

@@ -13,8 +13,9 @@ import Modal from "./Modal";
 import { v4 as uuidv4 } from "uuid";
 import TaskDetailsForm from "./TaskDetailsForm";
 import Tags from "./Tags";
-
 import { TaskType, TagType } from "../types/types";
+
+// import { TaskType, TagType } from "../types/types";
 interface TaskLIstControlProps {
   listName?: string;
   taskDate?: "UPCOMING" | "TODAY";
@@ -107,9 +108,10 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
     taskList: TaskType[],
     tagList: TagType[]
   ): TaskType[] => {
-    if (tagList.length === 0) {
+    if (!tagList || !tagList.length) {
       return taskList;
     }
+
     const filteredTaskList: TaskType[] = [];
 
     for (const task of taskList) {
@@ -296,12 +298,18 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
       return;
     }
 
-    const index = appliedTags.findIndex((tag) => tag.id === ID);
+    const index =
+      (appliedTags && appliedTags.findIndex((tag) => tag.id === ID)) || -1;
 
     if (index !== -1) return;
 
-    setAppliedTags([tag, ...appliedTags]);
-    setLocalStorageItem("appliedTags", [tag, ...appliedTags]);
+    if (!appliedTags || !appliedTags.length) {
+      setAppliedTags([tag]);
+      setLocalStorageItem("appliedTags", [tag]);
+    } else {
+      setAppliedTags([tag, ...appliedTags]);
+      setLocalStorageItem("appliedTags", [tag, ...appliedTags]);
+    }
   };
 
   const handleTagClear = (ID: string) => {
@@ -356,17 +364,18 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
         {/* tags */}
         <div className="flex items-center justify-between">
           <div>
-            {appliedTags.map((tag) => (
-              <div
-                key={tag.id}
-                className=" inline-flex gap-2 bg-amber-3000 p-2 m-2"
-              >
-                <p>{tag.name}</p>
-                <button onClick={() => handleTagClear(tag.id)}>
-                  {crossIcon}
-                </button>
-              </div>
-            ))}
+            {appliedTags &&
+              appliedTags.map((tag) => (
+                <div
+                  key={tag.id}
+                  className=" inline-flex gap-2 bg-amber-3000 p-2 m-2"
+                >
+                  <p>{tag.name}</p>
+                  <button onClick={() => handleTagClear(tag.id)}>
+                    {crossIcon}
+                  </button>
+                </div>
+              ))}
           </div>
 
           <div className="relative flex">
@@ -425,15 +434,16 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
         {isFilterTag && (
           <div className="w-full h-10 bg-red-400 flex justify-between ">
             <div className="flex gap-2">
-              {availableTags.map((tag) => (
-                <button
-                  key={tag.id}
-                  onClick={() => handleTagClick(tag.id)}
-                  className="bg-amber-200 p-2"
-                >
-                  {tag.name}
-                </button>
-              ))}
+              {availableTags &&
+                availableTags.map((tag) => (
+                  <button
+                    key={tag.id}
+                    onClick={() => handleTagClick(tag.id)}
+                    className="bg-amber-200 p-2"
+                  >
+                    {tag.name}
+                  </button>
+                ))}
             </div>
             <button onClick={closeFilterTag}>{crossIcon}</button>
           </div>
@@ -445,18 +455,19 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
 
         {/* task List */}
         <main className="">
-          {taskList.map((task, index) => (
-            <Task
-              key={index}
-              task={task}
-              index={index}
-              handleDelete={handleDelete}
-              handleToggle={handleToggle}
-              handleEdit={handleEdit}
-              openSideModal={openSideModal}
-              updateCurrTask={updateCurrTask}
-            />
-          ))}
+          {taskList &&
+            taskList.map((task, index) => (
+              <Task
+                key={index}
+                task={task}
+                index={index}
+                handleDelete={handleDelete}
+                handleToggle={handleToggle}
+                handleEdit={handleEdit}
+                openSideModal={openSideModal}
+                updateCurrTask={updateCurrTask}
+              />
+            ))}
         </main>
       </div>
 

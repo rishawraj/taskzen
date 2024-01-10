@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getLocalStorageItem } from "../utils/localStorage";
 import { crossIcon } from "../assets/icons";
 import { v4 as uuidv4 } from "uuid";
+import { TagType, TaskFormProps, TaskType } from "../types/types";
 
 function TaskDetailsForm({
   index,
@@ -9,21 +10,20 @@ function TaskDetailsForm({
   handleEdit,
   closeModal,
 }: TaskFormProps) {
-  if (!task) return;
-  const [title, setTitle] = useState(task.title);
-  const [description, setDescription] = useState(task.description || "");
+  const [title, setTitle] = useState(task!.title);
+  const [description, setDescription] = useState(task?.description || "");
   const [list, setList] = useState<string[]>([]);
   const [selectedListItem, setSelectedListItem] = useState(
-    task.selectedListItem
+    task?.selectedListItem || ""
   );
-  const [dueDate, setDueDate] = useState(task.dueDate);
+  const [dueDate, setDueDate] = useState(task?.dueDate || "");
 
-  const [taskTags, setTaskTags] = useState<TagType[]>(task.tags || []);
+  const [taskTags, setTaskTags] = useState<TagType[]>(task?.tags || []);
 
   const [tags, setTags] = useState<TagType[]>([]);
   const [tagListOpen, setTagLisOpen] = useState(false);
 
-  const [subTaskList, setSubTaskList] = useState(task.subTasks || []);
+  const [subTaskList, setSubTaskList] = useState(task?.subTasks || []);
 
   const [newSubTaskText, setNewSubTaskText] = useState("");
 
@@ -118,9 +118,10 @@ function TaskDetailsForm({
     // console.log("handleSubmit called from taskform.tsx");
 
     const updatedTask: TaskType = {
-      id: task.id,
+      // id: task.id,
+      id: task!.id,
       title: title,
-      completed: task.completed,
+      completed: task!.completed,
       description: description,
       // list: list,
       selectedListItem: selectedListItem,
@@ -129,7 +130,7 @@ function TaskDetailsForm({
       subTasks: subTaskList,
     };
 
-    handleEdit(task.id, updatedTask);
+    handleEdit(task!.id, updatedTask);
     closeModal();
   };
 
@@ -217,17 +218,18 @@ function TaskDetailsForm({
           {/* tags */}
           <label>Tags</label>
           <div>
-            {taskTags.map((tag) => (
-              <span
-                key={tag.id}
-                className="inline-flex flex-wrap gap-2 p-2 bg-amber-300 mr-2"
-              >
-                <p>{tag.name}</p>
-                <button onClick={() => handleDeleteTaskTags(tag.id)}>
-                  {crossIcon}
-                </button>
-              </span>
-            ))}
+            {taskTags &&
+              taskTags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="inline-flex flex-wrap gap-2 p-2 bg-amber-300 mr-2"
+                >
+                  <p>{tag.name}</p>
+                  <button onClick={() => handleDeleteTaskTags(tag.id)}>
+                    {crossIcon}
+                  </button>
+                </span>
+              ))}
           </div>
 
           <div className="flex gap-2 flex-wrap">
@@ -279,34 +281,35 @@ function TaskDetailsForm({
             />
           </form>
 
-          {subTaskList.map((subTask, i) => (
-            <div
-              key={i}
-              className="flex justify-between p-2 border-b-2 border-text "
-            >
-              <div className="flex gap-4">
-                <p>{subTask.completed ? "1" : "0"}</p>
-                <input
-                  id={i.toString()}
-                  type="checkbox"
-                  checked={subTask.completed}
-                  onChange={() => handleSubTaskToggle(subTask.id)}
-                />
-                <p>{subTask.title}</p>
+          {subTaskList &&
+            subTaskList.map((subTask, i) => (
+              <div
+                key={i}
+                className="flex justify-between p-2 border-b-2 border-text "
+              >
+                <div className="flex gap-4">
+                  <p>{subTask.completed ? "1" : "0"}</p>
+                  <input
+                    id={i.toString()}
+                    type="checkbox"
+                    checked={subTask.completed}
+                    onChange={() => handleSubTaskToggle(subTask.id)}
+                  />
+                  <p>{subTask.title}</p>
+                </div>
+                <button onClick={() => handleSubTaskDelete(subTask.id)}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    className="fill-text"
+                  >
+                    <path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm10.618-3L15 2H9L7.382 4H3v2h18V4z"></path>
+                  </svg>
+                </button>
               </div>
-              <button onClick={() => handleSubTaskDelete(subTask.id)}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  className="fill-text"
-                >
-                  <path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm10.618-3L15 2H9L7.382 4H3v2h18V4z"></path>
-                </svg>
-              </button>
-            </div>
-          ))}
+            ))}
 
           {/*  */}
           <button

@@ -17,10 +17,32 @@ const setLocalStorageItem = <T>(key: string, value: T): void => {
   }
 };
 
+// const getLocalStorageItem = <T>(key: string): T | [] => {
+//   if (isLocalStorageSupported()) {
+//     const storedValue = localStorage.getItem(key);
+//     return storedValue ? JSON.parse(storedValue) : null;
+//   } else {
+//     console.error("localStorage is not supported in this browser.");
+//     return [];
+//   }
+// };
+
 const getLocalStorageItem = <T>(key: string): T | [] => {
   if (isLocalStorageSupported()) {
     const storedValue = localStorage.getItem(key);
-    return storedValue ? JSON.parse(storedValue) : null;
+
+    if (typeof storedValue === "string") {
+      try {
+        // Attempt to parse the stored value as type T
+        return JSON.parse(storedValue) as T;
+      } catch (error) {
+        console.error("Error parsing localStorage item:", error);
+        return [] as T;
+      }
+    } else {
+      console.error("Invalid type stored in localStorage.");
+      return [] as T;
+    }
   } else {
     console.error("localStorage is not supported in this browser.");
     return [];

@@ -10,7 +10,7 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    // "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
 
@@ -19,25 +19,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
-
-    //
-
-    // "target": "esnext",
-    // "module": "esnext",
-    // "moduleResolution": "node",
-    // "strict": true,
-    // "esModuleInterop": true,
-    // "skipLibCheck": true,
-    // "forceConsistentCasingInFileNames": true,
-    // "noImplicitAny": true,
-    // "noImplicitThis": true,
-    // // "alwaysStrict": true,
-    // "strictNullChecks": true,
-    // "strictFunctionTypes": true,
-    // "strictBindCallApply": true,
-    // "strictPropertyInitialization": true
-  }
-
-  // "include": ["src"],
-  // "references": [{ "path": "./tsconfig.node.json" }]
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

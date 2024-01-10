@@ -23,6 +23,7 @@ function List() {
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
 
   // !
+
   useEffect(() => {
     if (isListMenu && !isSmallScreen) {
       closeListMenu();
@@ -76,19 +77,20 @@ function List() {
     <>
       <h1 className="font-bold">List</h1>
       <div className="flex flex-col">
-        {list.map((listItem, index) => (
-          <NavLink
-            className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-            key={index}
-            to={`/${listItem}`}
-          >
-            <div className="flex gap-2">
-              {solidSquare}
+        {list.map &&
+          list.map((listItem, index) => (
+            <NavLink
+              className={({ isActive }) => (isActive ? "bg-green-300" : "")}
+              key={index}
+              to={`/${listItem}`}
+            >
+              <div className="flex gap-2">
+                {solidSquare}
 
-              {listItem}
-            </div>
-          </NavLink>
-        ))}
+                {listItem}
+              </div>
+            </NavLink>
+          ))}
       </div>
 
       <button onClick={openListMenu} className="flex gap-2 bg-red-30">

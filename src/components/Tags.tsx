@@ -65,12 +65,15 @@ function Tags() {
   return (
     <>
       <div className="inline-flex gap-2 flex-wrap">
-        {tags.map((tag, index) => (
-          <span key={index} className="flex bg-amber-1000 p-2 gap-2">
-            <p>{tag.name}</p>
-            <button onClick={() => handleTagDelete(tag.id)}>{crossIcon}</button>
-          </span>
-        ))}
+        {tags &&
+          tags.map((tag, index) => (
+            <span key={index} className="flex bg-amber-1000 p-2 gap-2">
+              <p>{tag.name}</p>
+              <button onClick={() => handleTagDelete(tag.id)}>
+                {crossIcon}
+              </button>
+            </span>
+          ))}
       </div>
 
       <div className="">
