@@ -14,17 +14,41 @@ import { v4 as uuidv4 } from "uuid";
 import TaskDetailsForm from "./TaskDetailsForm";
 import Tags from "./Tags";
 import { TaskType, TagType } from "../types/types";
+import fetchWithAuth from "../utils/api";
 
-// import { TaskType, TagType } from "../types/types";
-interface TaskLIstControlProps {
-  listName?: string;
-  taskDate?: "UPCOMING" | "TODAY";
+enum TaskDateCategory {
+  UPCOMING = "UPCOMING",
+  TODAY = "TODAY",
 }
 
-function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
-  const [originalTaskList, setOrginalTaskList] = useState<TaskType[]>(
-    getLocalStorageItem<TaskType[]>("tasks") || []
-  );
+interface TaskLIstControlProps {
+  listName?: string;
+  taskDate?: TaskDateCategory;
+  searchQuery?: string;
+}
+
+function TaskLIstControl({
+  listName,
+  taskDate,
+  searchQuery,
+}: TaskLIstControlProps) {
+  // const [originalTaskList, setOrginalTaskList] = useState<TaskType[]>(
+  //   getLocalStorageItem<TaskType[]>("tasks") || []
+  // );
+  const [originalTaskList, setOrginalTaskList] = useState<TaskType[]>([]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const result = await fetchWithAuth<TaskType[]>("/api/tasks");
+        console.log("result: ", result);
+        setOrginalTaskList(result);
+      } catch (error) {}
+    };
+
+    fetchTasks();
+  }, []);
+
   const [taskList, setTaskList] = useState<TaskType[]>([]);
   const [newTask, setNewTask] = useState("");
 
@@ -141,9 +165,9 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
       taskList = originalTaskList.filter(
         (task) => task.selectedListItem === listName
       );
-    } else if (taskDate === "UPCOMING") {
+    } else if (taskDate === TaskDateCategory.UPCOMING) {
       taskList = originalTaskList.filter((task) => task.dueDate !== undefined);
-    } else if (taskDate === "TODAY") {
+    } else if (taskDate === TaskDateCategory.TODAY) {
       console.log();
       taskList = originalTaskList.filter((task) => {
         console.log(task.dueDate, dateToday());
@@ -154,12 +178,19 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
     const filteredTasks = filterTaskListByAppliedTags(taskList, appliedTags);
     console.log(filteredTasks);
 
-    // return taskList;
     return filteredTasks;
   };
 
   useEffect(() => {
-    setTaskList(filteredTasks());
+    if (searchQuery != undefined && searchQuery !== "") {
+      // console.log("search query", searchQuery);
+      const task = originalTaskList.filter(
+        (task) => task.title === searchQuery
+      );
+      setTaskList(task);
+    } else {
+      setTaskList(filteredTasks());
+    }
   }, [listName, taskDate, trigger, appliedTags]);
 
   const handleDelete = (ID: string) => {
@@ -346,18 +377,20 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
               height="24"
               viewBox="0 0 24 24"
               className="fill-text"
+              // fill-disabled
             >
               <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"></path>
             </svg>
           </button>
           <input
             name="task"
-            className="p-2 w-full bg-transparent focus:outline-none placeholder:text-text"
+            className="disabled:placeholder:text-gray-500 disabled:bg-gray-4000 p-2 w-full bg-transparent focus:outline-none placeholder:text-text"
             type="text"
             placeholder="add a new task"
             value={newTask}
             autoComplete="off"
             onChange={handleInputChange}
+            disabled={!!searchQuery || !!taskDate}
           />
         </form>
 
@@ -471,7 +504,7 @@ function TaskLIstControl({ listName, taskDate }: TaskLIstControlProps) {
         </main>
       </div>
 
-      <div className="flex-1 h-screen sticky top-0 px-10 bg-yellow-200 z-0">
+      <div className="flex-1 h-screen xl:sticky top-0 px-10 bg-yellow-200">
         {isSideModal ? (
           <Modal
             isOpen={isSideModal}

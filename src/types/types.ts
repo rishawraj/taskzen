@@ -12,6 +12,7 @@ interface TaskType {
   dueDate?: string;
   tags?: TagType[];
   subTasks?: SubTaskType[];
+  // user: string;
 }
 
 interface SubTaskType {
@@ -41,6 +42,11 @@ interface TaskFormProps {
   task: TaskType | undefined;
   handleEdit: (ID: string, task: TaskType) => void;
   closeModal: () => void;
+}
+
+export enum TaskDateCategory {
+  UPCOMING = "UPCOMING",
+  TODAY = "TODAY",
 }
 
 export { TaskType, TagType, TaskFormProps, TaskProps, NavBarProps };

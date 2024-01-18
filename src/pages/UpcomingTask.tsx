@@ -1,5 +1,6 @@
 import NavBar from "../components/NavBar";
 import TaskLIstControl from "../components/TaskLIstControl";
+import { TaskDateCategory } from "../types/types";
 
 function UpcomingTask() {
   return (
@@ -11,7 +12,7 @@ function UpcomingTask() {
 
         <div className="md:w-2/3 bg-pink-300 flex-grow">
           <h1 className="text-4xl">Upcoming</h1>
-          <TaskLIstControl taskDate="UPCOMING" />
+          <TaskLIstControl taskDate={TaskDateCategory.UPCOMING} />
         </div>
       </div>
     </>

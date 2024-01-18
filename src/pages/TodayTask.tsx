@@ -1,5 +1,6 @@
 import NavBar from "../components/NavBar";
 import TaskLIstControl from "../components/TaskLIstControl";
+import { TaskDateCategory } from "../types/types";
 
 function TodayTask() {
   const date = new Date();
@@ -12,7 +13,7 @@ function TodayTask() {
 
         <div className="md:w-2/3 bg-pink-300 flex-grow">
           <h1 className="text-4xl">Today, {date.getDate()}</h1>
-          <TaskLIstControl taskDate="TODAY" />
+          <TaskLIstControl taskDate={TaskDateCategory.TODAY} />
         </div>
       </div>
     </>

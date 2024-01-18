@@ -1,28 +1,31 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import List from "./List";
 
 import { useDarkMode } from "../Context/DarkModeContext";
 import {
-  calenderIcon,
+  // calenderIcon,
   cogIcon,
   crossIcon,
   doubleRightArrowIcon,
   homeIcon,
   listUlIcon,
   loginIcon,
-  solidNoteIcon,
+  // solidNoteIcon,
 } from "../assets/icons";
 import Modal from "./Modal";
+import { useAuth } from "../Context/AuthContext";
 
 function NavBar() {
   const [isDrawer, setDrawer] = useState(false);
   const [isSettings, setIsSettings] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const openSettings = () => setIsSettings(true);
   const closeSettings = () => setIsSettings(false);
 
   const { isDarkMode, toggleTheme } = useDarkMode();
+  const { user, logout } = useAuth();
 
   const themeIcon = isDarkMode ? (
     <svg
@@ -48,6 +51,17 @@ function NavBar() {
 
   const toggleDrawer = () => {
     setDrawer(!isDrawer);
+  };
+
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const searchURL = `/search/${encodeURIComponent(searchQuery)}`;
+    setSearchQuery("");
+
+    navigate(searchURL);
   };
 
   return (
@@ -77,7 +91,7 @@ function NavBar() {
           <div className="hidden bg-background text-text md:flex flex-col items-start w-full">
             <form
               className="flex text-text border-2 rounded-2xl px-2 w-full"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSubmit}
             >
               <button type="submit">
                 <svg
@@ -97,6 +111,8 @@ function NavBar() {
                 autoComplete="off"
                 id="quick-search"
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </form>
 
@@ -125,31 +141,22 @@ function NavBar() {
                   {doubleRightArrowIcon} Upcoming
                 </span>
               </NavLink>
-
-              <NavLink
-                to={"#"}
-                className="cursor-not-allowed text-text opacity-50"
-                onClick={(e) => e.preventDefault()}
-              >
-                <span className="flex gap-2">{calenderIcon} Calender</span>
-              </NavLink>
-
-              <NavLink
-                to={"#"}
-                className="cursor-not-allowed text-text opacity-50"
-                onClick={(e) => e.preventDefault()}
-              >
-                <span className="flex gap-2">{solidNoteIcon} Sticky Wall</span>
-              </NavLink>
             </div>
 
             <List />
 
             <div className="flex justify-between w-full items-end">
               <div>
-                <Link className="font-bold flex gap-2" to="/login">
-                  {loginIcon}Login
-                </Link>
+                {user == null ? (
+                  <Link className="font-bold flex gap-2" to="/login">
+                    {loginIcon}Login
+                  </Link>
+                ) : (
+                  <div className="flex flex-col">
+                    {user.userId}
+                    <button onClick={logout}>logout</button>
+                  </div>
+                )}
                 <button
                   onClick={openSettings}
                   className="font-semibold flex gap-2"
@@ -167,7 +174,7 @@ function NavBar() {
           <div className="md:hidden bg-background text-text flex flex-col items-center w-full border-t-2">
             <form
               className="flex text-text border-2 rounded-2xl px-2 mt-2"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSubmit}
             >
               <button type="submit">
                 <svg
@@ -182,10 +189,12 @@ function NavBar() {
               </button>
 
               <input
-                className="bg-transparent px-2 py-1 outline-none"
+                className="bg-transparent outline-none px-2 py-1"
+                autoComplete="off"
                 id="quick-search"
                 type="text"
-                autoComplete="off"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </form>
             <div className="w-2/3 p-2 mt-3 ">
@@ -211,23 +220,6 @@ function NavBar() {
                 >
                   <span className="flex gap-2">
                     {doubleRightArrowIcon} Upcoming
-                  </span>
-                </NavLink>
-
-                <NavLink
-                  to={"#"}
-                  className="cursor-not-allowed text-text opacity-50"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <span className="flex gap-2">{calenderIcon} Calender</span>
-                </NavLink>
-                <NavLink
-                  to={"#"}
-                  className="cursor-not-allowed text-text opacity-50"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <span className="flex gap-2">
-                    {solidNoteIcon} Sticky Wall
                   </span>
                 </NavLink>
               </div>
@@ -260,7 +252,7 @@ function NavBar() {
         fullScreen={true}
         // closeOnOutsideClick={true}
       >
-        <div className="p-10 z-50">
+        <div className="p-10">
           <div className="flex flex-col">
             <div className="flex justify-between">
               <h2 className="text-xl">Settings</h2>
@@ -269,9 +261,6 @@ function NavBar() {
             <div className="flex flex-col p-5 items-start">
               <button>Profile</button>
               <button>Delete All Tasks</button>
-              <button>Backup & Restore</button>
-              <button>Language</button>
-              <button>Turn off Sync</button>
             </div>
           </div>
         </div>
