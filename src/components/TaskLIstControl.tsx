@@ -10,11 +10,11 @@ import { crossIcon, dotsVerticalIcon, filterIcon } from "../assets/icons";
 import { useDarkMode } from "../Context/DarkModeContext";
 import Modal from "./Modal";
 
-import { v4 as uuidv4 } from "uuid";
 import TaskDetailsForm from "./TaskDetailsForm";
 import Tags from "./Tags";
-import { TaskType, TagType } from "../types/types";
-import fetchWithAuth from "../utils/api";
+import { DeleteResponse, TagType, TaskTypeResponse } from "../types/types";
+import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
+import { useAuth } from "../Context/AuthContext";
 
 enum TaskDateCategory {
   UPCOMING = "UPCOMING",
@@ -32,79 +32,66 @@ function TaskLIstControl({
   taskDate,
   searchQuery,
 }: TaskLIstControlProps) {
-  // const [originalTaskList, setOrginalTaskList] = useState<TaskType[]>(
-  //   getLocalStorageItem<TaskType[]>("tasks") || []
-  // );
-  const [originalTaskList, setOrginalTaskList] = useState<TaskType[]>([]);
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const result = await fetchWithAuth<TaskType[]>("/api/tasks");
-        console.log("result: ", result);
-        setOrginalTaskList(result);
-      } catch (error) {}
-    };
-
-    fetchTasks();
-  }, []);
-
-  const [taskList, setTaskList] = useState<TaskType[]>([]);
+  const [originalTaskList, setOrginalTaskList] = useState<TaskTypeResponse[]>(
+    []
+  );
+  const [taskList, setTaskList] = useState<TaskTypeResponse[]>([]);
   const [newTask, setNewTask] = useState("");
-
-  const { isDarkMode } = useDarkMode();
 
   const [isDotMenu, setIsDotMenu] = useState(false);
   const [isSideModal, setIsSideModal] = useState(false);
-
-  const [isScreenBelowXL, setIsScreenBelowXL] = useState(
-    window.innerWidth < 1280
-  );
-
   const [isEditTagMenu, setIsEditTagMenu] = useState(false);
-  const closeEditMenu = () => setIsEditTagMenu(false);
-  const openEditMenu = () => setIsEditTagMenu(true);
 
   const [trigger, setTrigger] = useState(false);
   const [count, setCount] = useState(0);
-  const [currTask, setCurrTask] = useState<TaskType>();
 
-  // const [filterTagsList, setFilterTagsList];
-
+  const [currTask, setCurrTask] = useState<TaskTypeResponse>();
+  const [isFilterTag, setIsFilterTag] = useState(false);
+  const [isScreenBelowXL, setIsScreenBelowXL] = useState(
+    window.innerWidth < 1280
+  );
   const [appliedTags, setAppliedTags] = useState<TagType[]>(
     getLocalStorageItem<TagType[]>("appliedTags") || []
   );
-
-  // const [taglist, setTagList];
 
   const [availableTags, setAvailableTags] = useState(
     getLocalStorageItem<TagType[]>("tags") || []
   );
 
+  const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
+
+  const { isDarkMode } = useDarkMode();
+  const { user } = useAuth();
+
+  //fetch tasks
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        setLoading(true);
+        const result = await fetchWithAuth<TaskTypeResponse[]>("/api/tasks");
+        setOrginalTaskList(result);
+
+        const sorted = sortTasksByCompleted(result);
+        const filtered = filteredTasks(sorted);
+        setTaskList(filtered);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  // Tags
   useEffect(() => {
     setAvailableTags(getLocalStorageItem<TagType[]>("tags"));
     setAppliedTags(getLocalStorageItem<TagType[]>("appliedTags"));
   }, [isEditTagMenu]);
 
-  const [isFilterTag, setIsFilterTag] = useState(false);
-  // const openFilterTag = () => setIsFilterTag(true);
-  const closeFilterTag = () => setIsFilterTag(false);
-  const toggleFilterTag = () => setIsFilterTag((prev) => !prev);
-
-  const updateCurrTask = (ID: string) => {
-    const tasks = getLocalStorageItem<TaskType[]>("tasks");
-    const task = tasks.find((t) => t.id === ID);
-    setCurrTask(task);
-    setCount((prevCount) => prevCount + 1);
-  };
-
-  const closeSideModal = () => setIsSideModal(false);
-  const openSideModal = () => setIsSideModal(true);
-
-  const closeDotMenu = () => setIsDotMenu(false);
-  // const openDotMenu = () => setIsDotMenu(true);
-  const toggleDotMenu = () => setIsDotMenu((prev) => !prev);
-
+  // Resize
   useEffect(() => {
     const handleResize = () => {
       const newWidth = window.innerWidth;
@@ -118,25 +105,70 @@ function TaskLIstControl({
     };
   }, []);
 
+  //! filter tasks
+  useEffect(() => {
+    fetchWithAuth<TaskTypeResponse[]>("/api/tasks").then((data) => {
+      setOrginalTaskList(data);
+      const sorted = sortTasksByCompleted(data);
+      const filtered = filteredTasks(sorted);
+      setTaskList(filtered);
+    });
+  }, [listName, taskDate, trigger, appliedTags, searchQuery]);
+  // !
+
+  const closeEditMenu = () => setIsEditTagMenu(false);
+  const openEditMenu = () => setIsEditTagMenu(true);
+  const closeFilterTag = () => setIsFilterTag(false);
+  const toggleFilterTag = () => setIsFilterTag((prev) => !prev);
+  const closeSideModal = () => setIsSideModal(false);
+  const openSideModal = () => setIsSideModal(true);
+  const closeDotMenu = () => setIsDotMenu(false);
+  const toggleDotMenu = () => setIsDotMenu((prev) => !prev);
+
+  const updateCurrTask = (ID: string) => {
+    const tasks = originalTaskList;
+    const task = tasks.find((t) => t._id === ID);
+    setCurrTask(task);
+    setCount((prevCount) => prevCount + 1);
+  };
+
   const dateToday = () => {
     const today = new Date();
     const currentYear = today.getFullYear();
-    const currentMonth = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed, so add 1
+    const currentMonth = String(today.getMonth() + 1).padStart(2, "0");
     const currentDate = String(today.getDate()).padStart(2, "0");
 
-    // Display the current date in the desired format
     return currentYear + "-" + currentMonth + "-" + currentDate;
   };
 
+  // !
+
+  const sortTasksByCompleted = (
+    tasks: TaskTypeResponse[]
+  ): TaskTypeResponse[] => {
+    // Sorting tasks in ascending order based on the 'completed' property
+    return tasks.sort((taskA, taskB) => {
+      if (taskA.completed && !taskB.completed) {
+        return 1;
+      } else if (!taskA.completed && taskB.completed) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
+  };
+
+  // !
+
   const filterTaskListByAppliedTags = (
-    taskList: TaskType[],
+    taskList: TaskTypeResponse[],
     tagList: TagType[]
-  ): TaskType[] => {
+  ): TaskTypeResponse[] => {
     if (!tagList || !tagList.length) {
       return taskList;
     }
 
-    const filteredTaskList: TaskType[] = [];
+    const filteredTaskList: TaskTypeResponse[] = [];
 
     for (const task of taskList) {
       if (task.tags) {
@@ -158,17 +190,20 @@ function TaskLIstControl({
     return filteredTaskList;
   };
 
-  const filteredTasks = () => {
-    let taskList = originalTaskList;
+  const filteredTasks = (
+    inputTaskList: TaskTypeResponse[]
+  ): TaskTypeResponse[] => {
+    let taskList = inputTaskList;
 
-    if (listName) {
+    if (searchQuery !== undefined && searchQuery !== "") {
+      taskList = inputTaskList.filter((task) => task.title === searchQuery);
+    } else if (listName) {
       taskList = originalTaskList.filter(
         (task) => task.selectedListItem === listName
       );
     } else if (taskDate === TaskDateCategory.UPCOMING) {
       taskList = originalTaskList.filter((task) => task.dueDate !== undefined);
     } else if (taskDate === TaskDateCategory.TODAY) {
-      console.log();
       taskList = originalTaskList.filter((task) => {
         console.log(task.dueDate, dateToday());
         return task.dueDate === dateToday();
@@ -176,143 +211,154 @@ function TaskLIstControl({
     }
 
     const filteredTasks = filterTaskListByAppliedTags(taskList, appliedTags);
-    console.log(filteredTasks);
 
     return filteredTasks;
   };
 
-  useEffect(() => {
-    if (searchQuery != undefined && searchQuery !== "") {
-      // console.log("search query", searchQuery);
-      const task = originalTaskList.filter(
-        (task) => task.title === searchQuery
-      );
-      setTaskList(task);
-    } else {
-      setTaskList(filteredTasks());
+  const handleDelete = async (ID: string) => {
+    const message = await fetchWithAuth(`/api/tasks/${ID}`, Methods.DELETE);
+    console.log(message);
+
+    if (!message) {
+      toast.error("Task not deleted, Try again!");
     }
-  }, [listName, taskDate, trigger, appliedTags]);
-
-  const handleDelete = (ID: string) => {
-    const newOriginalTaskList = originalTaskList.filter(
-      (task) => task.id !== ID
-    );
-
-    //? setTaskList & do not trigger useEffect
-
-    setOrginalTaskList(newOriginalTaskList);
-    setLocalStorageItem("tasks", newOriginalTaskList);
 
     setTrigger(!trigger);
 
     return;
   };
 
-  const handleToggle = (ID: string) => {
-    console.log(ID);
+  const handleToggle = async (ID: string, completed: boolean) => {
+    const index = originalTaskList.findIndex((task) => task._id === ID);
 
-    const localTaskList = getLocalStorageItem<TaskType[]>("tasks") || [];
+    const updatedTaskList = [...originalTaskList];
+    updatedTaskList[index].completed = !completed;
 
-    const updatedList = localTaskList.map((task) =>
-      task.id === ID ? { ...task, completed: !task.completed } : task
-    );
-
-    // console.log("hi");
-    // const updatedList = [...localTaskList];
-
-    // const newlist = updatedList.map((task) => task.id === ID);
-
-    // updatedList[index].completed = !updatedList[index].completed;
-
-    const sortedTasks = [...updatedList].sort((a, b) => {
-      if (a.completed && !b.completed) return 1;
-      if (!a.completed && b.completed) return -1;
-      return 0;
-    });
-
-    setOrginalTaskList(sortedTasks);
-    setLocalStorageItem("tasks", sortedTasks);
+    // const sorted = sortTasksByCompleted(updatedTaskList);
+    // const filtered = filteredTasks(sorted);
+    // setTaskList(filtered);
 
     setTrigger(!trigger);
+
+    const message = await fetchWithAuth(`/api/tasks/${ID}`, Methods.PUT, {
+      completed: !completed,
+    });
+
+    // ! handle error and reverse the changes.
+    if (!message) {
+      setOrginalTaskList(originalTaskList);
+      setTaskList(filteredTasks(originalTaskList));
+    } else {
+      setOrginalTaskList(updatedTaskList);
+      toast.success("Task updated successfully!");
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const localTaskList = getLocalStorageItem<TaskType[]>("tasks") || [];
-    console.log(newTask);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
 
-    const trimmedTask = newTask.trim();
+      const trimmedTask = newTask.trim();
 
-    if (trimmedTask === "") {
-      toast.warning("Task cannot be empty!");
-      return;
-    }
+      if (trimmedTask === "") {
+        toast.warning("Task cannot be empty!");
+        return;
+      }
 
-    if (localTaskList.some((task) => task.title === trimmedTask)) {
-      toast.warning("Task already exists!");
-      return;
-    }
-    const Uuid = uuidv4();
-
-    const newTaskList: TaskType[] = [
-      {
+      const task: TaskTypeResponse = {
         title: newTask,
         completed: false,
-        id: Uuid,
         selectedListItem: listName,
-      },
-      ...localTaskList,
-    ].sort((a, b): number => {
-      if (a.completed && !b.completed) return 1;
-      if (!a.completed && b.completed) return -1;
-      return 0;
-    });
+        user: user?.userId,
+      };
 
-    setLocalStorageItem("tasks", newTaskList);
-    setOrginalTaskList(newTaskList);
+      const updatedTaskList = [...originalTaskList, task];
+      const sorted = sortTasksByCompleted(updatedTaskList);
+      const filtered = filteredTasks(sorted);
+      setTaskList(filtered);
 
-    setTrigger(!trigger);
+      const message = await fetchWithAuth<TaskTypeResponse>(
+        "/api/tasks",
+        Methods.POST,
+        task
+      );
 
-    // setTaskList(newTaskList);
+      // !handle error
+      if (!message || message.error) {
+        setOrginalTaskList(originalTaskList);
+        const sorted = sortTasksByCompleted(originalTaskList);
+        const filtered = filteredTasks(sorted);
+        setTaskList(filtered);
+        if (message.error) {
+          toast.error(message.error);
+        } else {
+          toast.error("Task not added, Try again!");
+        }
+      } else {
+        task._id = message._id;
+        setOrginalTaskList(updatedTaskList);
+      }
 
-    // console.log(newTaskList[0]);
-
-    setNewTask("");
+      setNewTask("");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewTask(e.target.value);
   };
 
-  const handleEdit = (ID: string, task: TaskType) => {
-    const localTaskList = getLocalStorageItem<TaskType[]>("tasks");
+  const handleEdit = async (ID: string, task: TaskTypeResponse) => {
+    // const localTaskList = getLocalStorageItem<TaskTypeResponse[]>("tasks");
+    const localTaskList = originalTaskList;
 
     const newTaskList = [...localTaskList];
 
-    const newTask = newTaskList.filter((task) => task.id === ID)[0];
+    const newTask = newTaskList.filter((task) => task._id === ID)[0];
     console.log(newTask);
 
     // const newTask = newTaskList[index];
 
-    newTask.id = task.id;
+    // newTask._id = task._id;
     newTask.title = task.title;
     newTask.description = task.description;
-    newTask.selectedListItem = task.selectedListItem;
+    if (!task.selectedListItem && task.selectedListItem !== "") {
+      newTask.selectedListItem = task.selectedListItem;
+    }
     newTask.dueDate = task.dueDate;
     newTask.tags = task.tags;
     newTask.subTasks = task.subTasks;
 
-    setOrginalTaskList(newTaskList);
-    setLocalStorageItem("tasks", newTaskList);
-    // setTaskList(newTaskList);
+    const message = await fetchWithAuth(
+      `/api/tasks/${ID}`,
+      Methods.PUT,
+      newTask
+    );
+    console.log(message);
+
+    if (!message) {
+      toast.error("Task not updated. Try again!");
+      return;
+    }
+
     setTrigger(!trigger);
 
     toast.success("Changes Saved!");
   };
-  const handleDeleteAll = () => {
-    setTaskList([]);
-    setLocalStorageItem("tasks", []);
-    closeDotMenu();
+
+  const handleDeleteAll = async () => {
+    const response = await fetchWithAuth<DeleteResponse>(
+      "/api/tasks",
+      Methods.DELETE
+    );
+
+    if (!response || response.deletedTasks.deletedCount === 0) {
+      toast.warn("No tasks were deleted");
+    } else {
+      toast.info(`All tasks deleted (${response.deletedTasks.deletedCount})`);
+    }
+    setTrigger(!trigger);
   };
 
   const handleEditTagsClick = () => {
@@ -482,26 +528,25 @@ function TaskLIstControl({
           </div>
         )}
 
-        {/* {availableTags.map((t) => (
-          <p>{t.name}</p>
-        ))} */}
-
-        {/* task List */}
-        <main className="">
-          {taskList &&
-            taskList.map((task, index) => (
-              <Task
-                key={index}
-                task={task}
-                index={index}
-                handleDelete={handleDelete}
-                handleToggle={handleToggle}
-                handleEdit={handleEdit}
-                openSideModal={openSideModal}
-                updateCurrTask={updateCurrTask}
-              />
-            ))}
-        </main>
+        {loading ? (
+          <p>loading...</p>
+        ) : (
+          <main className="">
+            {taskList &&
+              taskList.map((task, index) => (
+                <Task
+                  key={index}
+                  task={task}
+                  index={index}
+                  handleDelete={handleDelete}
+                  handleToggle={handleToggle}
+                  handleEdit={handleEdit}
+                  openSideModal={openSideModal}
+                  updateCurrTask={updateCurrTask}
+                />
+              ))}
+          </main>
+        )}
       </div>
 
       <div className="flex-1 h-screen xl:sticky top-0 px-10 bg-yellow-200">
@@ -513,7 +558,7 @@ function TaskLIstControl({
             closeOnOutsideClick={isScreenBelowXL}
           >
             <TaskDetailsForm
-              // treat it like a new element
+              // key: treat it like a new element
               key={count}
               closeModal={closeSideModal}
               handleEdit={handleEdit}

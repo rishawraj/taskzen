@@ -1,8 +1,4 @@
 import { useEffect, useState } from "react";
-import {
-  setLocalStorageItem,
-  getLocalStorageItem,
-} from "../utils/localStorage";
 import { NavLink } from "react-router-dom";
 import {
   crossIcon,
@@ -11,9 +7,12 @@ import {
   solidSquare,
 } from "../assets/icons";
 import Modal from "./Modal";
+import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
+import { toast } from "react-toastify";
+import { ListResponse } from "../types/types";
 
 function List() {
-  const [list, setList] = useState<string[]>([]);
+  const [list, setList] = useState<ListResponse[]>([]);
   const [newListItem, setNewListItem] = useState("");
   const [isListMenu, setIsListMenu] = useState(false);
 
@@ -22,14 +21,14 @@ function List() {
 
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
 
-  // !
-
+  //  close listmenu on resize
   useEffect(() => {
     if (isListMenu && !isSmallScreen) {
       closeListMenu();
     }
   }, [isSmallScreen]);
 
+  // handle resize
   useEffect(() => {
     const handleResize = () => {
       setIsSmallScreen(window.innerWidth < 768); // Adjust the threshold if needed
@@ -44,33 +43,76 @@ function List() {
   }, []);
 
   useEffect(() => {
-    const localList = getLocalStorageItem<string[]>("list") || [];
-    setList(localList);
+    const fetchData = async () => {
+      try {
+        const data = await fetchWithAuth<ListResponse[]>(
+          "/api/lists",
+          Methods.GET
+        );
+        setList(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
 
-    const trimmedListName = newListItem.trim().toLowerCase();
+      const trimmedListName = newListItem.trim().toLowerCase();
 
-    if (trimmedListName === "") {
-      return;
-    }
+      if (trimmedListName === "") {
+        return;
+      }
 
-    const exists = list.find((l) => l === trimmedListName);
+      const exists = list.find((l) => l.name === trimmedListName);
 
-    if (exists !== undefined) {
-      return;
-    }
+      if (exists !== undefined) {
+        toast.info("list name already exits");
+        return;
+      }
 
-    setList([...list, newListItem]);
-    setLocalStorageItem("list", [...list, newListItem]);
-    setNewListItem("");
+      const reqBody: ListResponse = {
+        name: newListItem,
+      };
+
+      setList([...list, reqBody]);
+      setNewListItem("");
+
+      const response = await fetchWithAuth<ListResponse>(
+        "/api/lists",
+        Methods.POST,
+        reqBody
+      );
+
+      if (!response) {
+        console.error(response);
+
+        setList((prevList) => {
+          const newList = [...prevList];
+          newList.pop();
+          return newList;
+        });
+      }
+    } catch (error) {}
   };
 
-  const handleClearAll = () => {
-    setList([]);
-    setLocalStorageItem("list", []);
+  const handleClearAll = async () => {
+    try {
+      const backupList = [...list];
+      setList([]);
+
+      const response = await fetchWithAuth("/api/lists", Methods.DELETE);
+
+      if (!response) {
+        setList((prevList) => [...prevList, ...backupList]);
+      }
+    } catch (error) {
+      console.error("Error clearing list:", error);
+    }
   };
 
   return (
@@ -82,12 +124,12 @@ function List() {
             <NavLink
               className={({ isActive }) => (isActive ? "bg-green-300" : "")}
               key={index}
-              to={`/${listItem}`}
+              to={`/${listItem.name}`}
             >
               <div className="flex gap-2">
                 {solidSquare}
 
-                {listItem}
+                {listItem.name}
               </div>
             </NavLink>
           ))}

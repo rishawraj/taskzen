@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import { getLocalStorageItem } from "../utils/localStorage";
 import { crossIcon } from "../assets/icons";
 import { v4 as uuidv4 } from "uuid";
-import { TagType, TaskFormProps, TaskType } from "../types/types";
+import {
+  TagType,
+  TaskFormProps,
+  TaskType,
+  TaskTypeResponse,
+} from "../types/types";
 
 function TaskDetailsForm({
   index,
@@ -10,7 +15,7 @@ function TaskDetailsForm({
   handleEdit,
   closeModal,
 }: TaskFormProps) {
-  const [title, setTitle] = useState(task!.title);
+  const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [list, setList] = useState<string[]>([]);
   const [selectedListItem, setSelectedListItem] = useState(
@@ -117,9 +122,10 @@ function TaskDetailsForm({
   const handleSubmit = () => {
     // console.log("handleSubmit called from taskform.tsx");
 
-    const updatedTask: TaskType = {
+    const updatedTask: TaskTypeResponse = {
       // id: task.id,
-      id: task!.id,
+      // id: task!.id,
+
       title: title,
       completed: task!.completed,
       description: description,
@@ -130,7 +136,7 @@ function TaskDetailsForm({
       subTasks: subTaskList,
     };
 
-    handleEdit(task!.id, updatedTask);
+    handleEdit(task?._id || "", updatedTask);
     closeModal();
   };
 

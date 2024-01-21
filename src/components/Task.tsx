@@ -3,12 +3,13 @@ import { TaskProps } from "../types/types";
 function Task({
   index,
   task,
+  handleDelete,
   handleToggle,
   openSideModal,
   updateCurrTask,
 }: TaskProps) {
   const handleSideModalOpen = () => {
-    updateCurrTask(task.id);
+    updateCurrTask(task._id || "");
     openSideModal();
   };
 
@@ -22,10 +23,12 @@ function Task({
               name={`check-${index}`}
               id={`check-${index}`}
               checked={task.completed}
-              onChange={() => handleToggle(task.id)}
+              onChange={() => handleToggle(task._id || "", !!task.completed)}
             />
 
             <p>{task.title}</p>
+
+            {/* {task.updatedAt && <p>{"" + task.updatedAt}</p>} */}
 
             {task.dueDate && <p>{task.dueDate}</p>}
             {task.selectedListItem && <p>{task.selectedListItem}</p>}
@@ -47,6 +50,8 @@ function Task({
               <path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z"></path>
             </svg>
           </button>
+
+          <button onClick={() => handleDelete(task?._id || "")}>delete</button>
         </div>
       </div>
     </>

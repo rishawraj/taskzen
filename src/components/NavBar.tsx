@@ -152,8 +152,8 @@ function NavBar() {
                     {loginIcon}Login
                   </Link>
                 ) : (
-                  <div className="flex flex-col">
-                    {user.userId}
+                  <div className="flex flex-col bg-red-300 justify-start">
+                    {user.username}
                     <button onClick={logout}>logout</button>
                   </div>
                 )}

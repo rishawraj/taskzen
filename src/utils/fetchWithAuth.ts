@@ -1,8 +1,15 @@
 const VITE_BASE_BACKEND_URL = import.meta.env.VITE_BASE_BACKEND_URL;
 
+export enum Methods {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT",
+  DELETE = "DELETE",
+}
+
 const fetchWithAuth = async <T>(
   endpoint: string,
-  method: string = "GET",
+  method: Methods = Methods.GET,
   body?: any
 ): Promise<T> => {
   try {
@@ -28,10 +35,6 @@ const fetchWithAuth = async <T>(
       options
     );
 
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
     return (await response.json()) as T;
   } catch (error) {
     console.error("Error during fetch:", error);
@@ -39,4 +42,4 @@ const fetchWithAuth = async <T>(
   }
 };
 
-export default fetchWithAuth;
+export { fetchWithAuth };

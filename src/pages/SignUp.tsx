@@ -10,7 +10,7 @@ function SignUp() {
 
   const handleSignup = async () => {
     try {
-      const response = await fetch(VITE_BASE_BACKEND_URL + "/api/signup", {
+      const response = await fetch(VITE_BASE_BACKEND_URL + "/api/user/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

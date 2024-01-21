@@ -9,7 +9,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(VITE_BASE_BACKEND_URL + "/api/login", {
+      const response = await fetch(VITE_BASE_BACKEND_URL + "/api/user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
