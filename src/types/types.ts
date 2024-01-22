@@ -1,19 +1,25 @@
 interface TagType {
-  id: string;
-  name: string;
-}
-
-interface TaskType {
   _id?: string;
-  title: string;
-  completed: boolean;
-  description?: string;
-  selectedListItem?: string;
-  dueDate?: string;
-  tags?: TagType[];
-  subTasks?: SubTaskType[];
+  name: string;
   user?: string;
 }
+
+// export interface TaskType {
+//   _id?: string;
+//   title: string;
+//   completed: boolean;
+//   description?: string;
+//   selectedListItem?: string;
+//   dueDate?: string;
+//   tags?: string[];
+//   subTasks?: SubTaskType[];
+//   user?: string;
+// }
+
+// export interface selectedListItemType {
+//   _id?: string;
+//   name: string;
+// }
 
 export interface TaskTypeResponse {
   error?: any;
@@ -23,15 +29,15 @@ export interface TaskTypeResponse {
   description?: string;
   selectedListItem?: string;
   dueDate?: string;
-  tags?: TagType[];
+  tags?: string[];
   subTasks?: SubTaskType[];
   user?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-interface SubTaskType {
-  id: string;
+export interface SubTaskType {
+  _id?: string;
   title: string;
   completed: boolean;
 }
@@ -89,4 +95,4 @@ export interface ListResponse {
   updatedAt?: string;
 }
 
-export { TaskType, TagType, TaskFormProps, TaskProps, NavBarProps };
+export { TagType, TaskFormProps, TaskProps, NavBarProps };

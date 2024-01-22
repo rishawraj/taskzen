@@ -1,35 +1,50 @@
 import { useEffect, useState } from "react";
 import {
-  getLocalStorageItem,
+  // getLocalStorageItem,
   setLocalStorageItem,
 } from "../utils/localStorage";
 import { crossIcon, plusIcon } from "../assets/icons";
-import { v4 as uuidv4 } from "uuid";
-
-interface TagType {
-  id: string;
-  name: string;
-}
+// import { v4 as uuidv4 } from "uuid";
+import { DeleteResponse, TagType } from "../types/types";
+import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
+import { toast } from "react-toastify";
 
 function Tags() {
   const [tags, setTags] = useState<TagType[]>([]);
   const [newTagName, setNewTagName] = useState("");
 
   useEffect(() => {
-    const localTags = getLocalStorageItem<TagType[]>("tags") || [];
-    setTags(localTags);
+    const fetchTags = async () => {
+      const response = await fetchWithAuth<TagType[]>("/api/tags");
+      setTags(response);
+    };
+
+    fetchTags();
   }, []);
 
-  const handleTagDelete = (ID: string) => {
+  const handleTagDelete = async (ID: string) => {
+    const backupTagList = [...tags];
     const newTags = [...tags];
-    const index = newTags.findIndex((t) => t.id === ID);
+    const index = newTags.findIndex((t) => t._id === ID);
 
     newTags.splice(index, 1);
     setTags(newTags);
-    setLocalStorageItem("tags", newTags);
+    const response = await fetchWithAuth<DeleteResponse>(
+      `/api/tags/${ID}`,
+      Methods.DELETE
+    );
+
+    console.log(response);
+
+    if (!response) {
+      setTags(backupTagList);
+      toast.error("Tag not deleted, Try again");
+      return;
+    }
+    toast.success("Tag deleted");
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const trimmedTagName = newTagName.trim().toLowerCase();
@@ -44,19 +59,41 @@ function Tags() {
     }
 
     const newTag: TagType = {
-      id: uuidv4(),
       name: trimmedTagName,
     };
 
     const newTags = [...tags, newTag];
     setTags(newTags);
     setNewTagName("");
-    setLocalStorageItem("tags", newTags);
+
+    const response = await fetchWithAuth<TagType[]>(
+      "/api/tags",
+      Methods.POST,
+      newTag
+    );
+
+    if (!response) {
+      const tagList = [...tags];
+      tagList.pop();
+      setTags(tagList);
+      toast.error("Tag not added, Try again!");
+    }
   };
 
   const handleClearAll = () => {
-    setTags([]);
-    setLocalStorageItem("tags", []);
+    const deleteAll = async () => {
+      const backup = [...tags];
+      setTags([]);
+
+      const response = await fetchWithAuth("/api/tags", Methods.DELETE);
+      console.log(response);
+      if (!response) {
+        setTags(backup);
+        // toast.success("all tags deleted");
+      }
+    };
+
+    deleteAll();
 
     // clear applied tags
     setLocalStorageItem("appliedTags", []);
@@ -69,7 +106,7 @@ function Tags() {
           tags.map((tag, index) => (
             <span key={index} className="flex bg-amber-1000 p-2 gap-2">
               <p>{tag.name}</p>
-              <button onClick={() => handleTagDelete(tag.id)}>
+              <button onClick={() => handleTagDelete(tag._id || "")}>
                 {crossIcon}
               </button>
             </span>

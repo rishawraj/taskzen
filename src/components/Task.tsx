@@ -1,4 +1,6 @@
-import { TaskProps } from "../types/types";
+import { useEffect, useState } from "react";
+import { ListResponse, TaskProps } from "../types/types";
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 function Task({
   index,
@@ -8,6 +10,21 @@ function Task({
   openSideModal,
   updateCurrTask,
 }: TaskProps) {
+  const [currList, setCurrList] = useState<ListResponse>();
+
+  useEffect(() => {
+    const fetchCurrList = async () => {
+      if (!task.selectedListItem) {
+        return;
+      }
+      const response = await fetchWithAuth<ListResponse>(
+        `/api/lists/${task.selectedListItem}`
+      );
+      console.log(response);
+      setCurrList(response);
+    };
+    fetchCurrList();
+  }, []);
   const handleSideModalOpen = () => {
     updateCurrTask(task._id || "");
     openSideModal();
@@ -28,10 +45,8 @@ function Task({
 
             <p>{task.title}</p>
 
-            {/* {task.updatedAt && <p>{"" + task.updatedAt}</p>} */}
-
             {task.dueDate && <p>{task.dueDate}</p>}
-            {task.selectedListItem && <p>{task.selectedListItem}</p>}
+            {task.selectedListItem && <p>{currList?.name}</p>}
             {task.subTasks?.length ?? 0 >= 1 ? (
               <p className="bg-red-400 px-2">{task.subTasks!.length}</p>
             ) : (

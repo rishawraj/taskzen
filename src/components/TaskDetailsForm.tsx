@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { getLocalStorageItem } from "../utils/localStorage";
 import { crossIcon } from "../assets/icons";
-import { v4 as uuidv4 } from "uuid";
+// import { getLocalStorageItem } from "../utils/localStorage";
+// import { v4 as uuidv4 } from "uuid";
 import {
+  ListResponse,
   TagType,
   TaskFormProps,
-  TaskType,
   TaskTypeResponse,
+  SubTaskType,
 } from "../types/types";
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 function TaskDetailsForm({
   index,
@@ -17,45 +19,75 @@ function TaskDetailsForm({
 }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
-  const [list, setList] = useState<string[]>([]);
+
+  const [list, setList] = useState<ListResponse[]>([]);
+  const [currListItem, setCurrListItem] = useState<ListResponse>();
+
+  const [dueDate, setDueDate] = useState(task?.dueDate || "");
+
   const [selectedListItem, setSelectedListItem] = useState(
     task?.selectedListItem || ""
   );
-  const [dueDate, setDueDate] = useState(task?.dueDate || "");
 
-  const [taskTags, setTaskTags] = useState<TagType[]>(task?.tags || []);
+  const [taskTags, setTaskTags] = useState<TagType[]>([]);
 
   const [tags, setTags] = useState<TagType[]>([]);
+
   const [tagListOpen, setTagLisOpen] = useState(false);
 
   const [subTaskList, setSubTaskList] = useState(task?.subTasks || []);
-
   const [newSubTaskText, setNewSubTaskText] = useState("");
 
   useEffect(() => {
-    const localList = getLocalStorageItem<string[]>("list") || [];
-    setList(localList);
+    const fetchLists = async () => {
+      const response = await fetchWithAuth<ListResponse[]>("/api/lists");
+      setList(response);
+    };
+    const fetchTags = async () => {
+      const response = await fetchWithAuth<TagType[]>("/api/tags");
+      setTags(response);
+    };
 
-    const localTags = getLocalStorageItem<TagType[]>("tags");
-    setTags(localTags);
+    const fetchTaskTags = async () => {
+      const response = await fetchWithAuth<TagType[]>(
+        `/api/tasks/${task?._id}/tags`
+      );
+      setTaskTags(response || []);
+    };
+
+    const fetchCurrList = async () => {
+      if (!task?.selectedListItem) {
+        return;
+      }
+      const response = await fetchWithAuth<ListResponse>(
+        `/api/lists/${task?.selectedListItem}`
+      );
+      console.log(response);
+      setCurrListItem(response);
+    };
+
+    fetchLists();
+    fetchTags();
+    fetchTaskTags();
+    fetchCurrList();
   }, []);
 
-  const handleModalClose = () => {
+  const handleModalClose = async () => {
     console.log("does this also gets run??");
 
-    const tasks = getLocalStorageItem<TaskType[]>("tasks");
+    //! api call
+    const tasks = await fetchWithAuth<TaskTypeResponse[]>("/api/tasks");
     const subTasks = tasks[index].subTasks || [];
     setSubTaskList(subTasks);
     closeModal();
   };
 
-  // to modal.tsx
+  //todo to modal.tsx
   const handleEscapeKeyPress = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
       handleModalClose(); // Call the function to close the modal
     }
   };
-
   useEffect(() => {
     document.addEventListener("keydown", handleEscapeKeyPress);
 
@@ -74,8 +106,7 @@ function TaskDetailsForm({
       return;
     }
 
-    const newSubTask = {
-      id: uuidv4(),
+    const newSubTask: SubTaskType = {
       title: newSubTaskText,
       completed: false,
     };
@@ -87,7 +118,7 @@ function TaskDetailsForm({
   const handleSubTaskToggle = (ID: string) => {
     const newSubTaskList = [...subTaskList];
 
-    const subTaskIndex = newSubTaskList.findIndex((subT) => subT.id === ID);
+    const subTaskIndex = newSubTaskList.findIndex((subT) => subT._id === ID);
 
     if (subTaskIndex === -1) return;
 
@@ -107,7 +138,7 @@ function TaskDetailsForm({
   };
 
   const handleSubTaskDelete = (ID: string) => {
-    const index = subTaskList.findIndex((subT) => subT.id === ID);
+    const index = subTaskList.findIndex((subT) => subT._id === ID);
 
     if (index === -1) return;
 
@@ -120,19 +151,19 @@ function TaskDetailsForm({
   };
 
   const handleSubmit = () => {
-    // console.log("handleSubmit called from taskform.tsx");
+    const taskTagsIds = taskTags.map((tag) => (!!tag._id ? tag._id : ""));
+
+    console.log(selectedListItem);
 
     const updatedTask: TaskTypeResponse = {
-      // id: task.id,
-      // id: task!.id,
-
       title: title,
-      completed: task!.completed,
+      completed: (task && task.completed) || false,
       description: description,
-      // list: list,
+
       selectedListItem: selectedListItem,
+
       dueDate: dueDate,
-      tags: taskTags,
+      tags: taskTagsIds,
       subTasks: subTaskList,
     };
 
@@ -141,21 +172,35 @@ function TaskDetailsForm({
   };
 
   const handleListChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log("selcted option");
-    setSelectedListItem(e.target.value);
+    const selectedValue = e.target.value;
+
+    if (selectedValue === "") {
+      setSelectedListItem("");
+      setCurrListItem(undefined);
+    } else {
+      const currList = list.find((listItem) => listItem.name === selectedValue);
+      console.log(currList);
+
+      if (currList) {
+        setSelectedListItem(currList._id || "");
+        // setSelectedListItem({ _id: currList._id, name: currList.name });
+
+        setCurrListItem(currList);
+      }
+    }
   };
 
   const handleAddTags = (ID: string) => {
     if (taskTags.length === tags.length) return;
 
-    const tg = tags.find((t) => t.id === ID);
+    const tg = tags.find((t) => t._id === ID);
     if (!tg) return;
 
     setTaskTags([...taskTags, tg]);
   };
 
   const handleDeleteTaskTags = (ID: string) => {
-    const index = taskTags.findIndex((t) => t.id === ID);
+    const index = taskTags.findIndex((t) => t._id === ID);
 
     if (index === -1) return;
 
@@ -198,15 +243,15 @@ function TaskDetailsForm({
           <select
             id="list"
             name="list"
-            value={selectedListItem}
+            value={currListItem?.name}
             onChange={handleListChange}
           >
             <option value="">Select an option</option>
             {list &&
               list.map((listItem, i) => {
                 return (
-                  <option key={i} value={listItem}>
-                    {listItem}
+                  <option key={i} value={listItem.name}>
+                    {listItem.name}
                   </option>
                 );
               })}
@@ -227,11 +272,11 @@ function TaskDetailsForm({
             {taskTags &&
               taskTags.map((tag) => (
                 <span
-                  key={tag.id}
+                  key={tag._id}
                   className="inline-flex flex-wrap gap-2 p-2 bg-amber-300 mr-2"
                 >
                   <p>{tag.name}</p>
-                  <button onClick={() => handleDeleteTaskTags(tag.id)}>
+                  <button onClick={() => handleDeleteTaskTags(tag._id || "")}>
                     {crossIcon}
                   </button>
                 </span>
@@ -243,9 +288,9 @@ function TaskDetailsForm({
               tags &&
               tags.map((tag) => (
                 <button
-                  onClick={() => handleAddTags(tag.id)}
+                  onClick={() => handleAddTags(tag._id || "")}
                   className="py-2 bg-lime-300 min-w-[70px]"
-                  key={tag.id}
+                  key={tag._id}
                 >
                   {tag.name}
                 </button>
@@ -299,11 +344,11 @@ function TaskDetailsForm({
                     id={i.toString()}
                     type="checkbox"
                     checked={subTask.completed}
-                    onChange={() => handleSubTaskToggle(subTask.id)}
+                    onChange={() => handleSubTaskToggle(subTask._id || "")}
                   />
                   <p>{subTask.title}</p>
                 </div>
-                <button onClick={() => handleSubTaskDelete(subTask.id)}>
+                <button onClick={() => handleSubTaskDelete(subTask._id || "")}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"

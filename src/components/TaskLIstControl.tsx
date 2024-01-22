@@ -85,9 +85,17 @@ function TaskLIstControl({
     fetchTasks();
   }, []);
 
-  // Tags
+  // todo Tags
   useEffect(() => {
-    setAvailableTags(getLocalStorageItem<TagType[]>("tags"));
+    const fetchTags = async () => {
+      const response = await fetchWithAuth<TagType[]>("/api/tags");
+      console.log(response);
+
+      setAvailableTags(response);
+    };
+
+    fetchTags();
+
     setAppliedTags(getLocalStorageItem<TagType[]>("appliedTags"));
   }, [isEditTagMenu]);
 
@@ -175,7 +183,7 @@ function TaskLIstControl({
         let hasAllTags = true;
 
         for (const tag of tagList) {
-          const tagPresent = task.tags.some((taskTag) => taskTag.id === tag.id);
+          const tagPresent = task.tags.some((taskTag) => taskTag === tag._id);
 
           if (!tagPresent) {
             hasAllTags = false;
@@ -271,6 +279,7 @@ function TaskLIstControl({
         selectedListItem: listName,
         user: user?.userId,
       };
+      console.log(task);
 
       const updatedTaskList = [...originalTaskList, task];
       const sorted = sortTasksByCompleted(updatedTaskList);
@@ -282,6 +291,7 @@ function TaskLIstControl({
         Methods.POST,
         task
       );
+      console.log(message);
 
       // !handle error
       if (!message || message.error) {
@@ -311,24 +321,29 @@ function TaskLIstControl({
 
   const handleEdit = async (ID: string, task: TaskTypeResponse) => {
     // const localTaskList = getLocalStorageItem<TaskTypeResponse[]>("tasks");
-    const localTaskList = originalTaskList;
+    // const localTaskList = originalTaskList;
 
-    const newTaskList = [...localTaskList];
+    const newTaskList = [...originalTaskList];
 
     const newTask = newTaskList.filter((task) => task._id === ID)[0];
-    console.log(newTask);
+    console.log(task.selectedListItem);
 
     // const newTask = newTaskList[index];
 
     // newTask._id = task._id;
     newTask.title = task.title;
     newTask.description = task.description;
-    if (!task.selectedListItem && task.selectedListItem !== "") {
-      newTask.selectedListItem = task.selectedListItem;
-    }
+
+    // if (task.selectedListItem && task.selectedListItem !== "") {
+    //   console.log(task.selectedListItem);
+    // }
+
+    newTask.selectedListItem = task.selectedListItem;
+
     newTask.dueDate = task.dueDate;
     newTask.tags = task.tags;
-    newTask.subTasks = task.subTasks;
+
+    newTask.subTasks = task.subTasks || [];
 
     const message = await fetchWithAuth(
       `/api/tasks/${ID}`,
@@ -367,16 +382,16 @@ function TaskLIstControl({
   };
 
   const handleTagClick = (ID: string) => {
-    const localTags = getLocalStorageItem<TagType[]>("tags") || [];
+    const localTags = availableTags;
 
-    const tag = localTags.find((t) => t.id === ID);
+    const tag = localTags.find((t) => t._id === ID);
 
     if (!tag) {
       return;
     }
 
     const index =
-      (appliedTags && appliedTags.findIndex((tag) => tag.id === ID)) || -1;
+      (appliedTags && appliedTags.findIndex((tag) => tag._id === ID)) || -1;
 
     if (index !== -1) return;
 
@@ -392,7 +407,7 @@ function TaskLIstControl({
   const handleTagClear = (ID: string) => {
     const localFilteredTags =
       getLocalStorageItem<TagType[]>("appliedTags") || [];
-    const index = localFilteredTags.findIndex((tag) => tag.id === ID);
+    const index = localFilteredTags.findIndex((tag) => tag._id === ID);
 
     if (index === -1) {
       return;
@@ -446,11 +461,11 @@ function TaskLIstControl({
             {appliedTags &&
               appliedTags.map((tag) => (
                 <div
-                  key={tag.id}
+                  key={tag._id}
                   className=" inline-flex gap-2 bg-amber-3000 p-2 m-2"
                 >
                   <p>{tag.name}</p>
-                  <button onClick={() => handleTagClear(tag.id)}>
+                  <button onClick={() => handleTagClear(tag._id || "")}>
                     {crossIcon}
                   </button>
                 </div>
@@ -516,8 +531,8 @@ function TaskLIstControl({
               {availableTags &&
                 availableTags.map((tag) => (
                   <button
-                    key={tag.id}
-                    onClick={() => handleTagClick(tag.id)}
+                    key={tag._id}
+                    onClick={() => handleTagClick(tag._id || "")}
                     className="bg-amber-200 p-2"
                   >
                     {tag.name}
