@@ -12,7 +12,12 @@ import Modal from "./Modal";
 
 import TaskDetailsForm from "./TaskDetailsForm";
 import Tags from "./Tags";
-import { DeleteResponse, TagType, TaskTypeResponse } from "../types/types";
+import {
+  DeleteResponse,
+  ListResponse,
+  TagType,
+  TaskTypeResponse,
+} from "../types/types";
 import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
 import { useAuth } from "../Context/AuthContext";
 
@@ -22,7 +27,8 @@ enum TaskDateCategory {
 }
 
 interface TaskLIstControlProps {
-  listName?: string;
+  listName?: ListResponse;
+  // listName?: string;
   taskDate?: TaskDateCategory;
   searchQuery?: string;
 }
@@ -115,12 +121,23 @@ function TaskLIstControl({
 
   //! filter tasks
   useEffect(() => {
-    fetchWithAuth<TaskTypeResponse[]>("/api/tasks").then((data) => {
-      setOrginalTaskList(data);
-      const sorted = sortTasksByCompleted(data);
-      const filtered = filteredTasks(sorted);
-      setTaskList(filtered);
-    });
+    console.log(taskDate);
+    console.log(listName);
+
+    fetchWithAuth<TaskTypeResponse[]>("/api/tasks")
+      .then((data) => {
+        setOrginalTaskList(data);
+        const sorted = sortTasksByCompleted(data);
+        console.log(sorted);
+
+        const filtered = filteredTasks(sorted);
+        console.log(filtered);
+
+        setTaskList(filtered);
+      })
+      .catch((error) => {
+        console.error("Error fetching tasks:", error);
+      });
   }, [listName, taskDate, trigger, appliedTags, searchQuery]);
   // !
 
@@ -139,17 +156,6 @@ function TaskLIstControl({
     setCurrTask(task);
     setCount((prevCount) => prevCount + 1);
   };
-
-  const dateToday = () => {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = String(today.getMonth() + 1).padStart(2, "0");
-    const currentDate = String(today.getDate()).padStart(2, "0");
-
-    return currentYear + "-" + currentMonth + "-" + currentDate;
-  };
-
-  // !
 
   const sortTasksByCompleted = (
     tasks: TaskTypeResponse[]
@@ -201,22 +207,35 @@ function TaskLIstControl({
   const filteredTasks = (
     inputTaskList: TaskTypeResponse[]
   ): TaskTypeResponse[] => {
+    console.log(taskDate);
+
     let taskList = inputTaskList;
 
     if (searchQuery !== undefined && searchQuery !== "") {
       taskList = inputTaskList.filter((task) => task.title === searchQuery);
     } else if (listName) {
       taskList = originalTaskList.filter(
-        (task) => task.selectedListItem === listName
+        (task) => task.selectedListItem?.name === listName.name
       );
     } else if (taskDate === TaskDateCategory.UPCOMING) {
-      taskList = originalTaskList.filter((task) => task.dueDate !== undefined);
+      taskList = originalTaskList.filter((task) => task.dueDate);
     } else if (taskDate === TaskDateCategory.TODAY) {
+      console.log("today");
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       taskList = originalTaskList.filter((task) => {
-        console.log(task.dueDate, dateToday());
-        return task.dueDate === dateToday();
+        if (task.dueDate) {
+          const dueDate = new Date(task.dueDate);
+          dueDate.setHours(0, 0, 0, 0);
+
+          return dueDate.getTime() === today.getTime();
+        }
+        return false;
       });
     }
+    console.log(taskList);
 
     const filteredTasks = filterTaskListByAppliedTags(taskList, appliedTags);
 
@@ -276,10 +295,13 @@ function TaskLIstControl({
       const task: TaskTypeResponse = {
         title: newTask,
         completed: false,
-        selectedListItem: listName,
         user: user?.userId,
       };
-      console.log(task);
+
+      if (listName) {
+        const selectedList = { _id: listName._id, name: listName.name };
+        task.selectedListItem = selectedList;
+      }
 
       const updatedTaskList = [...originalTaskList, task];
       const sorted = sortTasksByCompleted(updatedTaskList);
@@ -291,7 +313,6 @@ function TaskLIstControl({
         Methods.POST,
         task
       );
-      console.log(message);
 
       // !handle error
       if (!message || message.error) {
@@ -309,6 +330,9 @@ function TaskLIstControl({
         setOrginalTaskList(updatedTaskList);
       }
 
+      // trigger
+      // setTrigger(!trigger);
+
       setNewTask("");
     } catch (error) {
       console.error(error);
@@ -320,36 +344,27 @@ function TaskLIstControl({
   };
 
   const handleEdit = async (ID: string, task: TaskTypeResponse) => {
-    // const localTaskList = getLocalStorageItem<TaskTypeResponse[]>("tasks");
-    // const localTaskList = originalTaskList;
-
     const newTaskList = [...originalTaskList];
 
     const newTask = newTaskList.filter((task) => task._id === ID)[0];
     console.log(task.selectedListItem);
 
-    // const newTask = newTaskList[index];
-
-    // newTask._id = task._id;
     newTask.title = task.title;
+    newTask.dueDate = task.dueDate && task.dueDate;
+    newTask.tags = task.tags;
+    newTask.subTasks = task.subTasks || [];
     newTask.description = task.description;
 
-    // if (task.selectedListItem && task.selectedListItem !== "") {
-    //   console.log(task.selectedListItem);
-    // }
-
-    newTask.selectedListItem = task.selectedListItem;
-
-    newTask.dueDate = task.dueDate;
-    newTask.tags = task.tags;
-
-    newTask.subTasks = task.subTasks || [];
+    if (task.selectedListItem) {
+      newTask.selectedListItem = task.selectedListItem;
+    }
 
     const message = await fetchWithAuth(
       `/api/tasks/${ID}`,
       Methods.PUT,
       newTask
     );
+
     console.log(message);
 
     if (!message) {

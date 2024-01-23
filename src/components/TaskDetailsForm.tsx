@@ -21,13 +21,18 @@ function TaskDetailsForm({
   const [description, setDescription] = useState(task?.description || "");
 
   const [list, setList] = useState<ListResponse[]>([]);
-  const [currListItem, setCurrListItem] = useState<ListResponse>();
 
-  const [dueDate, setDueDate] = useState(task?.dueDate || "");
+  // const [dueDate, setDueDate] = useState<Date>(new Date(task?.dueDate));
+
+  const [dueDate, setDueDate] = useState<Date | undefined>(
+    task?.dueDate ? new Date(task.dueDate) : undefined
+  );
+  // const [dueDate, setDueDate] = useState();
 
   const [selectedListItem, setSelectedListItem] = useState(
-    task?.selectedListItem || ""
+    task?.selectedListItem
   );
+  const [currListItem, setCurrListItem] = useState<ListResponse>();
 
   const [taskTags, setTaskTags] = useState<TagType[]>([]);
 
@@ -60,7 +65,7 @@ function TaskDetailsForm({
         return;
       }
       const response = await fetchWithAuth<ListResponse>(
-        `/api/lists/${task?.selectedListItem}`
+        `/api/lists/${task?.selectedListItem._id}`
       );
       console.log(response);
       setCurrListItem(response);
@@ -160,12 +165,17 @@ function TaskDetailsForm({
       completed: (task && task.completed) || false,
       description: description,
 
-      selectedListItem: selectedListItem,
+      // selectedListItem: selectedListItem,
+      // selectedListItem:{selected}
 
       dueDate: dueDate,
       tags: taskTagsIds,
       subTasks: subTaskList,
     };
+
+    if (selectedListItem) {
+      updatedTask.selectedListItem = selectedListItem;
+    }
 
     handleEdit(task?._id || "", updatedTask);
     closeModal();
@@ -175,14 +185,14 @@ function TaskDetailsForm({
     const selectedValue = e.target.value;
 
     if (selectedValue === "") {
-      setSelectedListItem("");
+      setSelectedListItem({ _id: "", name: currListItem?.name || "" });
       setCurrListItem(undefined);
     } else {
       const currList = list.find((listItem) => listItem.name === selectedValue);
       console.log(currList);
 
       if (currList) {
-        setSelectedListItem(currList._id || "");
+        setSelectedListItem(currList);
         // setSelectedListItem({ _id: currList._id, name: currList.name });
 
         setCurrListItem(currList);
@@ -211,6 +221,17 @@ function TaskDetailsForm({
 
     setTaskTags(newTaskTagList);
   };
+
+  // const formatDate = (date: Date | undefined) => {
+  //   if (!date) {
+  //     return;
+  //   }
+  //   const day = String(date.getDate()).padStart(2, "0");
+  //   const month = String(date.getMonth() + 1).padStart(2, "0");
+  //   // Months are 0-indexed
+  //   const year = date.getFullYear();
+  //   return `${day} ${month} ${year}`;
+  // };
 
   return (
     <>
@@ -260,7 +281,11 @@ function TaskDetailsForm({
           {/* due back */}
           <label htmlFor="dueDate">Due date</label>
           <input
-            onChange={(e) => setDueDate(e.target.value)}
+            onChange={(e) => {
+              const selectedDate = new Date(e.target.value);
+              setDueDate(selectedDate);
+            }}
+            value={dueDate ? dueDate.toISOString().split("T")[0] : ""}
             type="date"
             name="dueDate"
             id="dueDate"

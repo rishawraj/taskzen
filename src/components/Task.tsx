@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { ListResponse, TaskProps } from "../types/types";
-import { fetchWithAuth } from "../utils/fetchWithAuth";
+import { useEffect } from "react";
+import { TaskProps } from "../types/types";
 
 function Task({
   index,
@@ -10,24 +9,38 @@ function Task({
   openSideModal,
   updateCurrTask,
 }: TaskProps) {
-  const [currList, setCurrList] = useState<ListResponse>();
-
-  useEffect(() => {
-    const fetchCurrList = async () => {
-      if (!task.selectedListItem) {
-        return;
-      }
-      const response = await fetchWithAuth<ListResponse>(
-        `/api/lists/${task.selectedListItem}`
-      );
-      console.log(response);
-      setCurrList(response);
-    };
-    fetchCurrList();
-  }, []);
   const handleSideModalOpen = () => {
     updateCurrTask(task._id || "");
     openSideModal();
+  };
+  useEffect(() => {
+    console.log(task.dueDate);
+    if (!task.dueDate) {
+      return;
+    }
+
+    const dueDate = new Date(task.dueDate);
+
+    console.log(formatDate(dueDate));
+
+    const formattedDueDate = dueDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    });
+
+    console.log(formattedDueDate);
+  }, []);
+
+  const formatDate = (date: Date | undefined) => {
+    if (!date) {
+      return;
+    }
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
   };
 
   return (
@@ -45,8 +58,9 @@ function Task({
 
             <p>{task.title}</p>
 
-            {task.dueDate && <p>{task.dueDate}</p>}
-            {task.selectedListItem && <p>{currList?.name}</p>}
+            {task.dueDate && <p>{formatDate(new Date(task.dueDate))}</p>}
+
+            {task.selectedListItem && <p>{task.selectedListItem.name}</p>}
             {task.subTasks?.length ?? 0 >= 1 ? (
               <p className="bg-red-400 px-2">{task.subTasks!.length}</p>
             ) : (

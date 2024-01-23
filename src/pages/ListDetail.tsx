@@ -1,9 +1,22 @@
 import { useParams } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import TaskLIstControl from "../components/TaskLIstControl";
+import { useEffect, useState } from "react";
+import { ListResponse } from "../types/types";
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 function ListDetail() {
   const { listName } = useParams();
+  const [currListItem, setCurrListItem] = useState<ListResponse>();
+
+  useEffect(() => {
+    const fetchList = async () => {
+      const response = await fetchWithAuth<ListResponse[]>("/api/lists");
+      const curr = response.find((list) => list.name === listName);
+      setCurrListItem(curr);
+    };
+    fetchList();
+  }, [listName]);
 
   return (
     <>
@@ -14,7 +27,7 @@ function ListDetail() {
 
         <div className="md:w-2/3 bg-pink-300 flex-grow">
           <h1 className="text-4xl capitalize">{listName}</h1>
-          <TaskLIstControl listName={listName} />
+          <TaskLIstControl listName={currListItem} />
         </div>
       </div>
     </>

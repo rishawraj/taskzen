@@ -4,22 +4,10 @@ interface TagType {
   user?: string;
 }
 
-// export interface TaskType {
-//   _id?: string;
-//   title: string;
-//   completed: boolean;
-//   description?: string;
-//   selectedListItem?: string;
-//   dueDate?: string;
-//   tags?: string[];
-//   subTasks?: SubTaskType[];
-//   user?: string;
-// }
-
-// export interface selectedListItemType {
-//   _id?: string;
-//   name: string;
-// }
+export interface selectedListItemType {
+  _id?: string;
+  name: string;
+}
 
 export interface TaskTypeResponse {
   error?: any;
@@ -27,8 +15,8 @@ export interface TaskTypeResponse {
   title: string;
   completed: boolean;
   description?: string;
-  selectedListItem?: string;
-  dueDate?: string;
+  selectedListItem?: selectedListItemType;
+  dueDate?: Date;
   tags?: string[];
   subTasks?: SubTaskType[];
   user?: string;
