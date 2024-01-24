@@ -22,12 +22,9 @@ function TaskDetailsForm({
 
   const [list, setList] = useState<ListResponse[]>([]);
 
-  // const [dueDate, setDueDate] = useState<Date>(new Date(task?.dueDate));
-
   const [dueDate, setDueDate] = useState<Date | undefined>(
     task?.dueDate ? new Date(task.dueDate) : undefined
   );
-  // const [dueDate, setDueDate] = useState();
 
   const [selectedListItem, setSelectedListItem] = useState(
     task?.selectedListItem
@@ -165,9 +162,6 @@ function TaskDetailsForm({
       completed: (task && task.completed) || false,
       description: description,
 
-      // selectedListItem: selectedListItem,
-      // selectedListItem:{selected}
-
       dueDate: dueDate,
       tags: taskTagsIds,
       subTasks: subTaskList,
@@ -193,7 +187,6 @@ function TaskDetailsForm({
 
       if (currList) {
         setSelectedListItem(currList);
-        // setSelectedListItem({ _id: currList._id, name: currList.name });
 
         setCurrListItem(currList);
       }
@@ -221,17 +214,6 @@ function TaskDetailsForm({
 
     setTaskTags(newTaskTagList);
   };
-
-  // const formatDate = (date: Date | undefined) => {
-  //   if (!date) {
-  //     return;
-  //   }
-  //   const day = String(date.getDate()).padStart(2, "0");
-  //   const month = String(date.getMonth() + 1).padStart(2, "0");
-  //   // Months are 0-indexed
-  //   const year = date.getFullYear();
-  //   return `${day} ${month} ${year}`;
-  // };
 
   return (
     <>

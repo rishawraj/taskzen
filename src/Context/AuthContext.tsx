@@ -13,6 +13,8 @@ interface User {
 
 interface AuthContextProps {
   user: User | null;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -22,8 +24,46 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const VITE_BASE_BACKEND_URL = import.meta.env.VITE_BASE_BACKEND_URL;
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const respsone = await fetch(`${VITE_BASE_BACKEND_URL}/api/user/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (respsone.ok) {
+        const userData = (await respsone.json()) as {
+          token: string;
+          userId: string;
+          username: string;
+        };
+
+        console.log(userData);
+
+        setUser({ username: userData.username, userId: userData.userId });
+
+        localStorage.setItem("jwtToken", userData.token);
+        localStorage.setItem("username", userData.username);
+        localStorage.setItem("userId", userData.userId);
+      } else {
+        console.error("Login failed");
+      }
+    } catch (error) {
+      console.error("Error Logging in", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const logout = () => {
     localStorage.removeItem("jwtToken");
@@ -42,7 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const contextValue: AuthContextProps = { user, logout };
+  const contextValue: AuthContextProps = { user, isLoading, login, logout };
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

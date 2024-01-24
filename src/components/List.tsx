@@ -124,7 +124,7 @@ function List() {
             <NavLink
               className={({ isActive }) => (isActive ? "bg-green-300" : "")}
               key={index}
-              to={`/${listItem.name}`}
+              to={`/list/${listItem.name}`}
             >
               <div className="flex gap-2">
                 {solidSquare}

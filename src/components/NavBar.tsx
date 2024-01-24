@@ -26,6 +26,7 @@ function NavBar() {
 
   const { isDarkMode, toggleTheme } = useDarkMode();
   const { user, logout } = useAuth();
+  console.log(user);
 
   const themeIcon = isDarkMode ? (
     <svg
@@ -132,6 +133,10 @@ function NavBar() {
               >
                 <span className="flex gap-2">{listUlIcon} Today</span>
               </NavLink>
+
+              {/* <Link to="/today">
+                <span className="flex gap-2">{listUlIcon} Today</span>
+              </Link> */}
 
               <NavLink
                 className={({ isActive }) => (isActive ? "bg-green-300" : "")}

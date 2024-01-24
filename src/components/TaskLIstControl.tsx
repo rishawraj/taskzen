@@ -214,28 +214,30 @@ function TaskLIstControl({
     if (searchQuery !== undefined && searchQuery !== "") {
       taskList = inputTaskList.filter((task) => task.title === searchQuery);
     } else if (listName) {
-      taskList = originalTaskList.filter(
+      taskList = inputTaskList.filter(
         (task) => task.selectedListItem?.name === listName.name
       );
     } else if (taskDate === TaskDateCategory.UPCOMING) {
-      taskList = originalTaskList.filter((task) => task.dueDate);
+      taskList = inputTaskList.filter((task) => task.dueDate);
     } else if (taskDate === TaskDateCategory.TODAY) {
       console.log("today");
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      taskList = originalTaskList.filter((task) => {
+      taskList = inputTaskList.filter((task) => {
         if (task.dueDate) {
+          console.log(task.title);
+
           const dueDate = new Date(task.dueDate);
           dueDate.setHours(0, 0, 0, 0);
 
           return dueDate.getTime() === today.getTime();
+        } else {
+          return false;
         }
-        return false;
       });
     }
-    console.log(taskList);
 
     const filteredTasks = filterTaskListByAppliedTags(taskList, appliedTags);
 
@@ -301,6 +303,12 @@ function TaskLIstControl({
       if (listName) {
         const selectedList = { _id: listName._id, name: listName.name };
         task.selectedListItem = selectedList;
+      }
+
+      if (taskDate === TaskDateCategory.TODAY) {
+        const date = new Date();
+        console.log(date);
+        task.dueDate = date;
       }
 
       const updatedTaskList = [...originalTaskList, task];
@@ -466,7 +474,7 @@ function TaskLIstControl({
             value={newTask}
             autoComplete="off"
             onChange={handleInputChange}
-            disabled={!!searchQuery || !!taskDate}
+            disabled={!!searchQuery || taskDate === TaskDateCategory.UPCOMING}
           />
         </form>
 

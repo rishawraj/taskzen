@@ -7,6 +7,7 @@ function SearchResult() {
   const { query } = useParams() || "";
   const navigate = useNavigate();
   const [count, setCount] = useState(0);
+  console.log(query);
 
   useEffect(() => {
     setCount((prev) => prev + 1);
