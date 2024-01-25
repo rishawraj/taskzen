@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import {
   crossIcon,
   plusIcon,
@@ -121,8 +121,8 @@ function List() {
       <div className="flex flex-col">
         {list.map &&
           list.map((listItem, index) => (
-            <NavLink
-              className={({ isActive }) => (isActive ? "bg-green-300" : "")}
+            <Link
+              // className={({ isActive }) => (isActive ? "bg-green-300" : "")}
               key={index}
               to={`/list/${listItem.name}`}
             >
@@ -131,7 +131,7 @@ function List() {
 
                 {listItem.name}
               </div>
-            </NavLink>
+            </Link>
           ))}
       </div>
 

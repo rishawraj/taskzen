@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
+import "../styles/Spinner.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
 
   const handleLogin = async () => {
     try {
@@ -53,12 +54,22 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button
-          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
-          onClick={handleLogin}
-        >
-          Login
-        </button>
+
+        {isLoading ? (
+          <div className="lds-ellipsis">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        ) : (
+          <button
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
+            onClick={handleLogin}
+          >
+            Login
+          </button>
+        )}
         <p className="mt-4 text-sm text-gray-600">
           Don't have an account?{" "}
           <Link to="/signup" className="text-blue-500 hover:underline">

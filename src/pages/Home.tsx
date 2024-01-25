@@ -1,7 +1,6 @@
 import "react-toastify/dist/ReactToastify.css";
 import NavBar from "../components/NavBar";
 import TaskLIstControl from "../components/TaskLIstControl";
-// import { ToastContainer } from "react-toastify";
 
 export default function Home() {
   return (
@@ -16,7 +15,6 @@ export default function Home() {
           <TaskLIstControl />
         </div>
       </div>
-      {/* <ToastContainer /> */}
     </>
   );
 }

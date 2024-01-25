@@ -15,7 +15,10 @@ function ListDetail() {
       const curr = response.find((list) => list.name === listName);
       setCurrListItem(curr);
     };
+
     fetchList();
+
+    console.log("hi");
   }, [listName]);
 
   return (

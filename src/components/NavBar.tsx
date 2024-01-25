@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import List from "./List";
 
@@ -11,10 +11,13 @@ import {
   homeIcon,
   listUlIcon,
   loginIcon,
+  solidSquare,
   // solidNoteIcon,
 } from "../assets/icons";
 import Modal from "./Modal";
 import { useAuth } from "../Context/AuthContext";
+import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
+import { ListResponse } from "../types/types";
 
 function NavBar() {
   const [isDrawer, setDrawer] = useState(false);
@@ -27,6 +30,8 @@ function NavBar() {
   const { isDarkMode, toggleTheme } = useDarkMode();
   const { user, logout } = useAuth();
   console.log(user);
+
+  const [list, setList] = useState<ListResponse[]>([]);
 
   const themeIcon = isDarkMode ? (
     <svg
@@ -49,6 +54,22 @@ function NavBar() {
       <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.946 9.946 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"></path>
     </svg>
   );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchWithAuth<ListResponse[]>(
+          "/api/lists",
+          Methods.GET
+        );
+        setList(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const toggleDrawer = () => {
     setDrawer(!isDrawer);
@@ -147,6 +168,20 @@ function NavBar() {
                 </span>
               </NavLink>
             </div>
+
+            {list.map &&
+              list.map((listItem, index) => (
+                <NavLink
+                  className={({ isActive }) => (isActive ? "bg-green-300" : "")}
+                  key={index}
+                  to={`/list/${listItem.name}`}
+                >
+                  <div className="flex gap-2">
+                    {solidSquare}
+                    {listItem.name} nav
+                  </div>
+                </NavLink>
+              ))}
 
             <List />
 

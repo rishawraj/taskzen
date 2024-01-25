@@ -20,6 +20,7 @@ import {
 } from "../types/types";
 import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
 import { useAuth } from "../Context/AuthContext";
+import "../styles/Spinner-dotted.css";
 
 enum TaskDateCategory {
   UPCOMING = "UPCOMING",
@@ -28,7 +29,6 @@ enum TaskDateCategory {
 
 interface TaskLIstControlProps {
   listName?: ListResponse;
-  // listName?: string;
   taskDate?: TaskDateCategory;
   searchQuery?: string;
 }
@@ -64,7 +64,7 @@ function TaskLIstControl({
     getLocalStorageItem<TagType[]>("tags") || []
   );
 
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   // const [error, setError] = useState(null);
 
   const { isDarkMode } = useDarkMode();
@@ -74,7 +74,7 @@ function TaskLIstControl({
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         const result = await fetchWithAuth<TaskTypeResponse[]>("/api/tasks");
         setOrginalTaskList(result);
 
@@ -84,7 +84,7 @@ function TaskLIstControl({
       } catch (error) {
         console.log(error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -566,8 +566,17 @@ function TaskLIstControl({
           </div>
         )}
 
-        {loading ? (
-          <p>loading...</p>
+        {isLoading ? (
+          <div className="lds-roller">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
         ) : (
           <main className="">
             {taskList &&
