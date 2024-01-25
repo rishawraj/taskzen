@@ -30,10 +30,10 @@ export interface SubTaskType {
   completed: boolean;
 }
 
-interface NavBarProps {
-  toggleTheme?: () => void;
-  isDarkMode?: boolean;
-}
+// interface NavBarProps {
+//   toggleTheme?: () => void;
+//   isDarkMode?: boolean;
+// }
 
 interface TaskProps {
   index: number;
@@ -76,11 +76,10 @@ export interface DeleteResponse {
 export interface ListResponse {
   _id?: string;
   name: string;
-  // Assuming tasks can be any type; replace with the actual type if known
   tasks?: any[];
   user?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export { TagType, TaskFormProps, TaskProps, NavBarProps };
+export { TagType, TaskFormProps, TaskProps };

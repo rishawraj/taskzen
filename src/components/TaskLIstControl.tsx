@@ -27,7 +27,7 @@ enum TaskDateCategory {
   TODAY = "TODAY",
 }
 
-interface TaskLIstControlProps {
+export interface TaskLIstControlProps {
   listName?: ListResponse;
   taskDate?: TaskDateCategory;
   searchQuery?: string;
@@ -263,11 +263,11 @@ function TaskLIstControl({
     const updatedTaskList = [...originalTaskList];
     updatedTaskList[index].completed = !completed;
 
-    // const sorted = sortTasksByCompleted(updatedTaskList);
-    // const filtered = filteredTasks(sorted);
-    // setTaskList(filtered);
+    const sorted = sortTasksByCompleted(updatedTaskList);
+    const filtered = filteredTasks(sorted);
+    setTaskList(filtered);
 
-    setTrigger(!trigger);
+    // setTrigger(!trigger);
 
     const message = await fetchWithAuth(`/api/tasks/${ID}`, Methods.PUT, {
       completed: !completed,
@@ -279,7 +279,6 @@ function TaskLIstControl({
       setTaskList(filteredTasks(originalTaskList));
     } else {
       setOrginalTaskList(updatedTaskList);
-      toast.success("Task updated successfully!");
     }
   };
 
@@ -451,6 +450,9 @@ function TaskLIstControl({
 
   return (
     <div className="flex flex-col xl:flex-row h-full ">
+      <div>{listName && listName.name}</div>
+      <div>{taskDate && taskDate}</div>
+      <div>{searchQuery && searchQuery}</div>
       <div className="flex-1 bg-amber-2000 h-full p-5">
         {/* form */}
         <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
@@ -579,7 +581,7 @@ function TaskLIstControl({
           </div>
         ) : (
           <main className="">
-            {taskList &&
+            {taskList.length > 0 ? (
               taskList.map((task, index) => (
                 <Task
                   key={index}
@@ -591,7 +593,10 @@ function TaskLIstControl({
                   openSideModal={openSideModal}
                   updateCurrTask={updateCurrTask}
                 />
-              ))}
+              ))
+            ) : (
+              <h3>NO TAKS FOUND!</h3>
+            )}
           </main>
         )}
       </div>
@@ -605,7 +610,6 @@ function TaskLIstControl({
             closeOnOutsideClick={isScreenBelowXL}
           >
             <TaskDetailsForm
-              // key: treat it like a new element
               key={count}
               closeModal={closeSideModal}
               handleEdit={handleEdit}

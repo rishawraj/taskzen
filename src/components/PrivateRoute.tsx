@@ -8,8 +8,11 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { user } = useAuth();
+  console.log(user);
 
-  if (user) {
+  const userId = localStorage.getItem("userId");
+
+  if (userId) {
     return <>{children}</>;
   }
 

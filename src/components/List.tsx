@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import {
-  crossIcon,
-  plusIcon,
-  rightArrowIcon,
-  solidSquare,
-} from "../assets/icons";
+import { crossIcon, plusIcon, rightArrowIcon } from "../assets/icons";
 import Modal from "./Modal";
 import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
 import { toast } from "react-toastify";
 import { ListResponse } from "../types/types";
 
-function List() {
+interface ListProps {
+  triggerFetch: () => void;
+}
+
+function List({ triggerFetch }: ListProps) {
   const [list, setList] = useState<ListResponse[]>([]);
   const [newListItem, setNewListItem] = useState("");
   const [isListMenu, setIsListMenu] = useState(false);
@@ -40,22 +38,6 @@ function List() {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchWithAuth<ListResponse[]>(
-          "/api/lists",
-          Methods.GET
-        );
-        setList(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -97,7 +79,10 @@ function List() {
           return newList;
         });
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error Add List:", error);
+    }
+    triggerFetch();
   };
 
   const handleClearAll = async () => {
@@ -113,28 +98,11 @@ function List() {
     } catch (error) {
       console.error("Error clearing list:", error);
     }
+    triggerFetch();
   };
 
   return (
     <>
-      <h1 className="font-bold">List</h1>
-      <div className="flex flex-col">
-        {list.map &&
-          list.map((listItem, index) => (
-            <Link
-              // className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-              key={index}
-              to={`/list/${listItem.name}`}
-            >
-              <div className="flex gap-2">
-                {solidSquare}
-
-                {listItem.name}
-              </div>
-            </Link>
-          ))}
-      </div>
-
       <button onClick={openListMenu} className="flex gap-2 bg-red-30">
         {rightArrowIcon}More
       </button>

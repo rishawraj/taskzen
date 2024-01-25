@@ -1,37 +1,49 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import List from "./List";
 
 import { useDarkMode } from "../Context/DarkModeContext";
 import {
-  // calenderIcon,
-  cogIcon,
-  crossIcon,
+  // crossIcon,
   doubleRightArrowIcon,
   homeIcon,
   listUlIcon,
   loginIcon,
   solidSquare,
-  // solidNoteIcon,
 } from "../assets/icons";
-import Modal from "./Modal";
+// import Modal from "./Modal";
 import { useAuth } from "../Context/AuthContext";
 import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
-import { ListResponse } from "../types/types";
+import { ListResponse, TaskDateCategory } from "../types/types";
 
-function NavBar() {
+export type NavBarProps = {
+  handleTaskDate: (taskDateProp: TaskDateCategory) => void;
+  handleSearchQuery: (searchQueryProp: string) => void;
+  handleListItem: (listItemProp: ListResponse) => void;
+  handleHome: () => void;
+};
+
+function NavBar({
+  handleTaskDate,
+  handleListItem,
+  handleSearchQuery,
+  handleHome,
+}: NavBarProps) {
   const [isDrawer, setDrawer] = useState(false);
-  const [isSettings, setIsSettings] = useState(false);
+  // const [isSettings, setIsSettings] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [list, setList] = useState<ListResponse[]>([]);
 
-  const openSettings = () => setIsSettings(true);
-  const closeSettings = () => setIsSettings(false);
+  const [triggerFetch, setTriggerFetch] = useState(false);
 
   const { isDarkMode, toggleTheme } = useDarkMode();
   const { user, logout } = useAuth();
-  console.log(user);
+  // console.log(user);
 
-  const [list, setList] = useState<ListResponse[]>([]);
+  // const openSettings = () => setIsSettings(true);
+  // const closeSettings = () => setIsSettings(false);
+
+  const triggerFetchList = () => setTriggerFetch(!triggerFetch);
 
   const themeIcon = isDarkMode ? (
     <svg
@@ -69,21 +81,15 @@ function NavBar() {
     };
 
     fetchData();
-  }, []);
+  }, [triggerFetch]);
 
   const toggleDrawer = () => {
     setDrawer(!isDrawer);
   };
 
-  const navigate = useNavigate();
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const searchURL = `/search/${encodeURIComponent(searchQuery)}`;
-    setSearchQuery("");
-
-    navigate(searchURL);
+    handleSearchQuery(searchQuery);
   };
 
   return (
@@ -121,7 +127,6 @@ function NavBar() {
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
-                  // style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"
                   className="fill-text"
                 >
                   <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"></path>
@@ -141,49 +146,34 @@ function NavBar() {
             <h2 className=" font-bold">tasks</h2>
 
             <div className="flex flex-col">
-              <NavLink
-                className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-                to="/"
-              >
+              <button onClick={() => handleHome()}>
                 <span className="flex gap-2">{homeIcon} Home</span>
-              </NavLink>
+              </button>
 
-              <NavLink
-                className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-                to="/today"
-              >
+              <button onClick={() => handleTaskDate(TaskDateCategory.TODAY)}>
                 <span className="flex gap-2">{listUlIcon} Today</span>
-              </NavLink>
+              </button>
 
-              {/* <Link to="/today">
-                <span className="flex gap-2">{listUlIcon} Today</span>
-              </Link> */}
-
-              <NavLink
-                className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-                to="/upcoming"
-              >
+              <button onClick={() => handleTaskDate(TaskDateCategory.UPCOMING)}>
                 <span className="flex gap-2">
-                  {doubleRightArrowIcon} Upcoming
+                  {doubleRightArrowIcon} UPCOMING
                 </span>
-              </NavLink>
+              </button>
             </div>
+
+            <h2 className="font-bold">List</h2>
 
             {list.map &&
               list.map((listItem, index) => (
-                <NavLink
-                  className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-                  key={index}
-                  to={`/list/${listItem.name}`}
-                >
+                <button key={index} onClick={() => handleListItem(listItem)}>
                   <div className="flex gap-2">
                     {solidSquare}
-                    {listItem.name} nav
+                    {listItem.name}
                   </div>
-                </NavLink>
+                </button>
               ))}
 
-            <List />
+            <List triggerFetch={triggerFetchList} />
 
             <div className="flex justify-between w-full items-end">
               <div>
@@ -197,12 +187,12 @@ function NavBar() {
                     <button onClick={logout}>logout</button>
                   </div>
                 )}
-                <button
+                {/* <button
                   onClick={openSettings}
                   className="font-semibold flex gap-2"
                 >
                   {cogIcon} Settings
-                </button>
+                </button> */}
               </div>
 
               <button onClick={toggleTheme}>{themeIcon}</button>
@@ -240,33 +230,75 @@ function NavBar() {
             <div className="w-2/3 p-2 mt-3 ">
               <h2 className=" font-bold">tasks</h2>
               <div className="flex flex-col">
-                <NavLink
-                  className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-                  to="/"
-                >
-                  <span className="flex gap-2">{homeIcon} Home</span>
-                </NavLink>
+                <h2 className=" font-bold">tasks</h2>
 
-                <NavLink
-                  className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-                  to="/today"
-                >
-                  <span className="flex gap-2">{listUlIcon} Today</span>
-                </NavLink>
+                <div className="flex flex-col">
+                  <button onClick={() => handleHome()}>
+                    <span className="flex gap-2">{homeIcon} Home</span>
+                  </button>
 
-                <NavLink
-                  className={({ isActive }) => (isActive ? "bg-green-300" : "")}
-                  to="/upcoming"
-                >
-                  <span className="flex gap-2">
-                    {doubleRightArrowIcon} Upcoming
-                  </span>
-                </NavLink>
+                  <button
+                    onClick={() => handleTaskDate(TaskDateCategory.TODAY)}
+                  >
+                    <span className="flex gap-2">{listUlIcon} Today</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleTaskDate(TaskDateCategory.UPCOMING)}
+                  >
+                    <span className="flex gap-2">
+                      {doubleRightArrowIcon} UPCOMING
+                    </span>
+                  </button>
+                </div>
+
+                <h2 className="font-bold">List</h2>
+
+                {list.map &&
+                  list.map((listItem, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleListItem(listItem)}
+                    >
+                      <div className="flex gap-2">
+                        {solidSquare}
+                        {listItem.name}
+                      </div>
+                    </button>
+                  ))}
+
+                <List triggerFetch={triggerFetchList} />
+                <br />
               </div>
-              <List />
-              <br />
 
               <div className="flex justify-between w-full items-end">
+                <div>
+                  {user == null ? (
+                    <Link className="font-bold flex gap-2" to="/login">
+                      {loginIcon}Login
+                    </Link>
+                  ) : (
+                    <div className="flex flex-col bg-red-300 justify-start">
+                      {user.username}
+                      <button onClick={logout}>logout</button>
+                    </div>
+                  )}
+                  {/* <button
+                    onClick={openSettings}
+                    className="font-semibold flex gap-2"
+                  >
+                    {cogIcon} Settings
+                  </button> */}
+                </div>
+
+                <button onClick={toggleTheme}>{themeIcon}</button>
+              </div>
+
+              {/*  */}
+              {/*  */}
+              {/*  */}
+
+              {/* <div className="flex justify-between w-full items-end">
                 <div>
                   <Link className="font-bold flex gap-2" to="/login">
                     {loginIcon}Login
@@ -280,13 +312,13 @@ function NavBar() {
                 </div>
 
                 <button onClick={toggleTheme}>{themeIcon}</button>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
       </nav>
 
-      <Modal
+      {/* <Modal
         isOpen={isSettings}
         onClose={closeSettings}
         fullScreen={true}
@@ -304,7 +336,7 @@ function NavBar() {
             </div>
           </div>
         </div>
-      </Modal>
+      </Modal> */}
     </>
   );
 }

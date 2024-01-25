@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "../styles/Spinner.css";
 
 function SignUp() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -12,6 +14,7 @@ function SignUp() {
 
   const handleSignup = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch(VITE_BASE_BACKEND_URL + "/api/user/signup", {
         method: "POST",
         headers: {
@@ -34,6 +37,8 @@ function SignUp() {
       }
     } catch (error) {
       console.error("Error during signup:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -86,12 +91,23 @@ function SignUp() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button
-          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
-          onClick={handleSignup}
-        >
-          Sign Up
-        </button>
+
+        {isLoading ? (
+          <div className="lds-ellipsis">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        ) : (
+          <button
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
+            onClick={handleSignup}
+          >
+            Sign Up
+          </button>
+        )}
+
         <p className="mt-4 text-sm text-gray-600">
           Already have an account?{" "}
           <Link to="/login" className="text-blue-500 hover:underline">
