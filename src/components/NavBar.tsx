@@ -4,14 +4,12 @@ import List from "./List";
 
 import { useDarkMode } from "../Context/DarkModeContext";
 import {
-  // crossIcon,
   doubleRightArrowIcon,
   homeIcon,
   listUlIcon,
   loginIcon,
   solidSquare,
 } from "../assets/icons";
-// import Modal from "./Modal";
 import { useAuth } from "../Context/AuthContext";
 import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
 import { ListResponse, TaskDateCategory } from "../types/types";
@@ -30,7 +28,6 @@ function NavBar({
   handleHome,
 }: NavBarProps) {
   const [isDrawer, setDrawer] = useState(false);
-  // const [isSettings, setIsSettings] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [list, setList] = useState<ListResponse[]>([]);
 
@@ -38,10 +35,6 @@ function NavBar({
 
   const { isDarkMode, toggleTheme } = useDarkMode();
   const { user, logout } = useAuth();
-  // console.log(user);
-
-  // const openSettings = () => setIsSettings(true);
-  // const closeSettings = () => setIsSettings(false);
 
   const triggerFetchList = () => setTriggerFetch(!triggerFetch);
 
@@ -90,15 +83,46 @@ function NavBar({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleSearchQuery(searchQuery);
+    setSearchQuery("");
+    setDrawer(!isDrawer);
+  };
+
+  const handleListDelete = async (ID: string) => {
+    try {
+      const backup = list;
+      const updatedList = list.filter((list) => list._id !== ID);
+      setList(updatedList);
+
+      const response = await fetchWithAuth(`/api/lists/${ID}`, Methods.DELETE);
+
+      if (response) {
+        handleHome();
+      } else {
+        setList(backup);
+      }
+    } catch (error) {
+      console.error("Error deleting list", error);
+    }
+
+    //
   };
 
   return (
     <>
       <nav className="bg-pink-1000 flex flex-col p-2 sticky text-text h-full capitalize">
         <div className="flex md:flex-col justify-between">
-          <Link to="/">
-            <h1 className="font-bold">Taskzen</h1>
-          </Link>
+          {/* <Link to="/"> */}
+
+          <button
+            className="font-bold"
+            onClick={() => {
+              handleHome();
+              setDrawer(false);
+            }}
+          >
+            Taskzen
+          </button>
+          {/* </Link> */}
 
           {/* mobile menu */}
           <div className="md:hidden">
@@ -162,15 +186,19 @@ function NavBar({
             </div>
 
             <h2 className="font-bold">List</h2>
-
             {list.map &&
               list.map((listItem, index) => (
-                <button key={index} onClick={() => handleListItem(listItem)}>
-                  <div className="flex gap-2">
-                    {solidSquare}
-                    {listItem.name}
-                  </div>
-                </button>
+                <div className="bg-red-200 flex justify-between w-full">
+                  <button key={index} onClick={() => handleListItem(listItem)}>
+                    <div className="flex gap-2">
+                      {solidSquare}
+                      {listItem.name}
+                    </div>
+                  </button>
+                  <button onClick={() => handleListDelete(listItem._id || "")}>
+                    delete
+                  </button>
+                </div>
               ))}
 
             <List triggerFetch={triggerFetchList} />
@@ -187,12 +215,6 @@ function NavBar({
                     <button onClick={logout}>logout</button>
                   </div>
                 )}
-                {/* <button
-                  onClick={openSettings}
-                  className="font-semibold flex gap-2"
-                >
-                  {cogIcon} Settings
-                </button> */}
               </div>
 
               <button onClick={toggleTheme}>{themeIcon}</button>
@@ -227,24 +249,34 @@ function NavBar({
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </form>
-            <div className="w-2/3 p-2 mt-3 ">
-              <h2 className=" font-bold">tasks</h2>
-              <div className="flex flex-col">
-                <h2 className=" font-bold">tasks</h2>
 
+            <div className="w-2/3 p-2 mt-3 ">
+              <h2 className=" font-bold">tasksss</h2>
+              <div className="flex flex-col">
                 <div className="flex flex-col">
-                  <button onClick={() => handleHome()}>
+                  <button
+                    onClick={() => {
+                      handleHome();
+                      setDrawer(false);
+                    }}
+                  >
                     <span className="flex gap-2">{homeIcon} Home</span>
                   </button>
 
                   <button
-                    onClick={() => handleTaskDate(TaskDateCategory.TODAY)}
+                    onClick={() => {
+                      handleTaskDate(TaskDateCategory.TODAY);
+                      setDrawer(false);
+                    }}
                   >
                     <span className="flex gap-2">{listUlIcon} Today</span>
                   </button>
 
                   <button
-                    onClick={() => handleTaskDate(TaskDateCategory.UPCOMING)}
+                    onClick={() => {
+                      handleTaskDate(TaskDateCategory.UPCOMING);
+                      setDrawer(false);
+                    }}
                   >
                     <span className="flex gap-2">
                       {doubleRightArrowIcon} UPCOMING
@@ -256,15 +288,25 @@ function NavBar({
 
                 {list.map &&
                   list.map((listItem, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleListItem(listItem)}
-                    >
-                      <div className="flex gap-2">
-                        {solidSquare}
-                        {listItem.name}
-                      </div>
-                    </button>
+                    <div className="flex justify-between">
+                      <button
+                        key={index}
+                        onClick={() => {
+                          handleListItem(listItem);
+                          setDrawer(false);
+                        }}
+                      >
+                        <div className="flex gap-2">
+                          {solidSquare}
+                          {listItem.name}
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => handleListDelete(listItem._id || "")}
+                      >
+                        delete
+                      </button>
+                    </div>
                   ))}
 
                 <List triggerFetch={triggerFetchList} />
@@ -283,60 +325,14 @@ function NavBar({
                       <button onClick={logout}>logout</button>
                     </div>
                   )}
-                  {/* <button
-                    onClick={openSettings}
-                    className="font-semibold flex gap-2"
-                  >
-                    {cogIcon} Settings
-                  </button> */}
                 </div>
 
                 <button onClick={toggleTheme}>{themeIcon}</button>
               </div>
-
-              {/*  */}
-              {/*  */}
-              {/*  */}
-
-              {/* <div className="flex justify-between w-full items-end">
-                <div>
-                  <Link className="font-bold flex gap-2" to="/login">
-                    {loginIcon}Login
-                  </Link>
-                  <button
-                    onClick={openSettings}
-                    className="font-semibold flex gap-2"
-                  >
-                    {cogIcon} Settings
-                  </button>
-                </div>
-
-                <button onClick={toggleTheme}>{themeIcon}</button>
-              </div> */}
             </div>
           </div>
         )}
       </nav>
-
-      {/* <Modal
-        isOpen={isSettings}
-        onClose={closeSettings}
-        fullScreen={true}
-        // closeOnOutsideClick={true}
-      >
-        <div className="p-10">
-          <div className="flex flex-col">
-            <div className="flex justify-between">
-              <h2 className="text-xl">Settings</h2>
-              <button onClick={closeSettings}>{crossIcon}</button>
-            </div>
-            <div className="flex flex-col p-5 items-start">
-              <button>Profile</button>
-              <button>Delete All Tasks</button>
-            </div>
-          </div>
-        </div>
-      </Modal> */}
     </>
   );
 }
