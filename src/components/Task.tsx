@@ -4,7 +4,7 @@ import { TaskProps } from "../types/types";
 function Task({
   index,
   task,
-  handleDelete,
+  // handleDelete,
   handleToggle,
   openSideModal,
   updateCurrTask,
@@ -14,7 +14,6 @@ function Task({
     openSideModal();
   };
   useEffect(() => {
-    console.log(task.dueDate);
     if (!task.dueDate) {
       return;
     }
@@ -80,7 +79,7 @@ function Task({
             </svg>
           </button>
 
-          <button onClick={() => handleDelete(task?._id || "")}>delete</button>
+          {/* <button onClick={() => handleDelete(task?._id || "")}>delete</button> */}
         </div>
       </div>
     </>

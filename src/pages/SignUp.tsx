@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Spinner.css";
+import { useDarkMode } from "../Context/DarkModeContext";
 
 function SignUp() {
   const [email, setEmail] = useState("");
@@ -9,6 +10,12 @@ function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  const { isDarkMode } = useDarkMode();
+
+  const logoPath = isDarkMode
+    ? "src/assets/logo-white.png"
+    : "src/assets/logo-black.png";
 
   const VITE_BASE_BACKEND_URL = import.meta.env.VITE_BASE_BACKEND_URL;
 
@@ -43,7 +50,10 @@ function SignUp() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row gap-10 md:gap-5 items-center justify-center min-h-screen bg-background">
+      <div className="bg-red-3000 flex justify-center items-center ">
+        <img src={logoPath} alt="logo" />
+      </div>
       <div className="bg-white p-8 rounded shadow-md w-96">
         <h2 className="text-3xl font-semibold mb-6">Sign Up</h2>
         <div className="mb-4">

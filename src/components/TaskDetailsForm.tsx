@@ -16,6 +16,7 @@ function TaskDetailsForm({
   task,
   handleEdit,
   closeModal,
+  handleDelete,
 }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
@@ -376,6 +377,15 @@ function TaskDetailsForm({
             className="bg-green-400 p-2 my-2"
           >
             Save Changes
+          </button>
+          <button
+            onClick={() => {
+              handleDelete(task?._id || "");
+              closeModal();
+            }}
+            className="bg-red-300 p-2 text-text"
+          >
+            Delete
           </button>
         </div>
       </div>

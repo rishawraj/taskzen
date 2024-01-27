@@ -121,17 +121,17 @@ function TaskLIstControl({
 
   //! filter tasks
   useEffect(() => {
-    console.log(taskDate);
-    console.log(listName);
+    // console.log(taskDate);
+    // console.log(listName);
 
     fetchWithAuth<TaskTypeResponse[]>("/api/tasks")
       .then((data) => {
         setOrginalTaskList(data);
         const sorted = sortTasksByCompleted(data);
-        console.log(sorted);
+        // console.log(sorted);
 
         const filtered = filteredTasks(sorted);
-        console.log(filtered);
+        // console.log(filtered);
 
         setTaskList(filtered);
       })
@@ -246,14 +246,10 @@ function TaskLIstControl({
 
   const handleDelete = async (ID: string) => {
     const message = await fetchWithAuth(`/api/tasks/${ID}`, Methods.DELETE);
-    console.log(message);
-
     if (!message) {
       toast.error("Task not deleted, Try again!");
     }
-
     setTrigger(!trigger);
-
     return;
   };
 
@@ -404,10 +400,13 @@ function TaskLIstControl({
   };
 
   const handleTagClick = (ID: string) => {
+    const isAppliedAlready = appliedTags.find((t) => t._id === ID);
+    if (isAppliedAlready) {
+      return;
+    }
+
     const localTags = availableTags;
-
     const tag = localTags.find((t) => t._id === ID);
-
     if (!tag) {
       return;
     }
@@ -449,11 +448,11 @@ function TaskLIstControl({
   };
 
   return (
-    <div className="flex flex-col xl:flex-row h-full ">
+    <div className="flex flex-col text-text xl:flex-row h-full ">
       <div>{listName && listName.name}</div>
       <div>{taskDate && taskDate}</div>
       <div>{searchQuery && searchQuery}</div>
-      <div className="flex-1 bg-amber-2000 h-full p-5">
+      <div className="flex-1 bg-another h-full p-5">
         {/* form */}
         <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
           <button className="p-2" type="submit">
@@ -551,14 +550,14 @@ function TaskLIstControl({
         </div>
 
         {isFilterTag && (
-          <div className="w-full h-10 bg-red-400 flex justify-between ">
-            <div className="flex gap-2">
+          <div className="w-full min-h-[30px] bg-accent flex justify-between ">
+            <div className="flex gap-2 p-2">
               {availableTags &&
                 availableTags.map((tag) => (
                   <button
                     key={tag._id}
                     onClick={() => handleTagClick(tag._id || "")}
-                    className="bg-amber-200 p-2"
+                    className="bg-secondary rounded p-2"
                   >
                     {tag.name}
                   </button>
@@ -601,7 +600,7 @@ function TaskLIstControl({
         )}
       </div>
 
-      <div className="flex-1 h-screen xl:sticky top-0 px-10 bg-yellow-200">
+      <div className="flex-1 h-screen xl:sticky top-0 px-10">
         {isSideModal ? (
           <Modal
             isOpen={isSideModal}
@@ -615,10 +614,11 @@ function TaskLIstControl({
               handleEdit={handleEdit}
               task={currTask}
               index={0}
+              handleDelete={handleDelete}
             />
           </Modal>
         ) : (
-          <div className="hidden xl:flex bg-pink-400">
+          <div className="hidden min-h-screen xl:flex justify-center p-5">
             <h2>Please open a task!</h2>
           </div>
         )}

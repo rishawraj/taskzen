@@ -117,10 +117,7 @@ function List({ triggerFetch }: ListProps) {
             <h3 className="text-xl">Add List</h3>
             <button onClick={closeListMenu}>{crossIcon}</button>
           </div>
-          <form
-            onSubmit={handleSubmit}
-            className="flex border-2 border-red-400 rounded "
-          >
+          <form onSubmit={handleSubmit} className="flex border-2 rounded ">
             <button type="submit">{plusIcon}</button>
             <input
               onChange={(e) => setNewListItem(e.target.value)}
@@ -131,7 +128,7 @@ function List({ triggerFetch }: ListProps) {
             />
           </form>
 
-          <button onClick={handleClearAll} className="bg-red-100  p-2 mt-2">
+          <button onClick={handleClearAll} className="p-2 mt-2">
             clear all lists
           </button>
         </div>

@@ -7,8 +7,10 @@ import {
   doubleRightArrowIcon,
   homeIcon,
   listUlIcon,
+  logOutIcon,
   loginIcon,
   solidSquare,
+  trashIcon,
 } from "../assets/icons";
 import { useAuth } from "../Context/AuthContext";
 import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
@@ -109,7 +111,7 @@ function NavBar({
 
   return (
     <>
-      <nav className="bg-pink-1000 flex flex-col p-2 sticky text-text h-full capitalize">
+      <nav className="flex flex-col p-5 sticky text-text h-full capitalize pb-2 border-b-2">
         <div className="flex md:flex-col justify-between">
           {/* <Link to="/"> */}
 
@@ -180,7 +182,7 @@ function NavBar({
 
               <button onClick={() => handleTaskDate(TaskDateCategory.UPCOMING)}>
                 <span className="flex gap-2">
-                  {doubleRightArrowIcon} UPCOMING
+                  {doubleRightArrowIcon} Upcoming
                 </span>
               </button>
             </div>
@@ -188,7 +190,7 @@ function NavBar({
             <h2 className="font-bold">List</h2>
             {list.map &&
               list.map((listItem, index) => (
-                <div className="bg-red-200 flex justify-between w-full">
+                <div className="flex justify-between w-full">
                   <button key={index} onClick={() => handleListItem(listItem)}>
                     <div className="flex gap-2">
                       {solidSquare}
@@ -196,7 +198,7 @@ function NavBar({
                     </div>
                   </button>
                   <button onClick={() => handleListDelete(listItem._id || "")}>
-                    delete
+                    {trashIcon}
                   </button>
                 </div>
               ))}
@@ -210,9 +212,11 @@ function NavBar({
                     {loginIcon}Login
                   </Link>
                 ) : (
-                  <div className="flex flex-col bg-red-300 justify-start">
-                    {user.username}
-                    <button onClick={logout}>logout</button>
+                  <div className="flex flex-col justify-start gap-2">
+                    <p className="font-bold px-2">{user.username}</p>
+                    <button className="flex gap-2" onClick={logout}>
+                      {logOutIcon} logout
+                    </button>
                   </div>
                 )}
               </div>
@@ -222,6 +226,7 @@ function NavBar({
           </div>
         </div>
 
+        {/* Mobile  */}
         {isDrawer && (
           <div className="md:hidden bg-background text-text flex flex-col items-center w-full border-t-2">
             <form
@@ -250,10 +255,10 @@ function NavBar({
               />
             </form>
 
-            <div className="w-2/3 p-2 mt-3 ">
-              <h2 className=" font-bold">tasksss</h2>
-              <div className="flex flex-col">
-                <div className="flex flex-col">
+            <div className="w-full p-2 mt-3 ">
+              <h2 className=" font-bold mb-2 text-xl text-dark">Tasks</h2>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2">
                   <button
                     onClick={() => {
                       handleHome();
@@ -279,12 +284,12 @@ function NavBar({
                     }}
                   >
                     <span className="flex gap-2">
-                      {doubleRightArrowIcon} UPCOMING
+                      {doubleRightArrowIcon} Upcoming
                     </span>
                   </button>
                 </div>
 
-                <h2 className="font-bold">List</h2>
+                <h2 className="font-bold text-xl text-dark">List</h2>
 
                 {list.map &&
                   list.map((listItem, index) => (
@@ -304,13 +309,12 @@ function NavBar({
                       <button
                         onClick={() => handleListDelete(listItem._id || "")}
                       >
-                        delete
+                        {trashIcon}
                       </button>
                     </div>
                   ))}
 
                 <List triggerFetch={triggerFetchList} />
-                <br />
               </div>
 
               <div className="flex justify-between w-full items-end">
@@ -320,9 +324,11 @@ function NavBar({
                       {loginIcon}Login
                     </Link>
                   ) : (
-                    <div className="flex flex-col bg-red-300 justify-start">
-                      {user.username}
-                      <button onClick={logout}>logout</button>
+                    <div className="flex flex-col justify-start gap-2">
+                      <p className="font-bold px-2">{user.username}</p>
+                      <button className="flex gap-2" onClick={logout}>
+                        {logOutIcon} logout
+                      </button>
                     </div>
                   )}
                 </div>

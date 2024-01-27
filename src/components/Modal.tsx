@@ -43,7 +43,7 @@ const Modal = ({
 
   return fullScreen ? (
     <div className="fixed top-0 bg-black/25 bg-lime-5000 inset-0 flex items-center justify-center z-20">
-      <div className="bg-red-300" ref={modalContentRef}>
+      <div className="bg-background" ref={modalContentRef}>
         {children}
       </div>
     </div>

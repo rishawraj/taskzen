@@ -51,6 +51,7 @@ interface TaskFormProps {
   task: TaskTypeResponse | undefined;
   handleEdit: (ID: string, task: TaskTypeResponse) => void;
   closeModal: () => void;
+  handleDelete: (ID: string) => void;
 }
 
 export enum TaskDateCategory {

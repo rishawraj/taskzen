@@ -50,7 +50,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="md:w-2/3 bg-pink-300 flex-grow">
+        <div className="md:w-2/3 flex-grow">
           <TaskLIstControl
             key={count}
             listName={listItem}
