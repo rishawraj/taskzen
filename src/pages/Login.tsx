@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import { useDarkMode } from "../Context/DarkModeContext";
-import "../styles/Spinner.css";
+import logoWhite from "../assets/logo-white.png";
+import logoBlack from "../assets/logo-black.png";
+import "../styles/Loading.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,9 +14,7 @@ const Login = () => {
   const { login, isLoading } = useAuth();
   const { isDarkMode } = useDarkMode();
 
-  const logoPath = isDarkMode
-    ? "src/assets/logo-white.png"
-    : "src/assets/logo-black.png";
+  const logoPath = isDarkMode ? logoWhite : logoBlack;
 
   const handleLogin = async () => {
     try {

@@ -4,6 +4,8 @@ import List from "./List";
 
 import { useDarkMode } from "../Context/DarkModeContext";
 import {
+  burgerMenuIcon,
+  crossIcon,
   doubleRightArrowIcon,
   homeIcon,
   listUlIcon,
@@ -11,6 +13,7 @@ import {
   loginIcon,
   solidSquare,
   trashIcon,
+  userCircleIcon,
 } from "../assets/icons";
 import { useAuth } from "../Context/AuthContext";
 import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
@@ -80,6 +83,11 @@ function NavBar({
 
   const toggleDrawer = () => {
     setDrawer(!isDrawer);
+    if (isDrawer) {
+      document.body.classList.remove("overflow-hidden");
+    } else {
+      document.body.classList.add("overflow-hidden");
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -111,12 +119,10 @@ function NavBar({
 
   return (
     <>
-      <nav className="flex flex-col p-5 sticky text-text h-full capitalize pb-2 border-b-2">
-        <div className="flex md:flex-col justify-between">
-          {/* <Link to="/"> */}
-
+      <nav className="flex flex-col p-3 sticky text-text h-full capitalize bg-background">
+        <div className="flex md:flex-col md:justify-start justify-between items-start">
           <button
-            className="font-bold"
+            className="font-bold text-2xl"
             onClick={() => {
               handleHome();
               setDrawer(false);
@@ -124,86 +130,93 @@ function NavBar({
           >
             Taskzen
           </button>
-          {/* </Link> */}
 
           {/* mobile menu */}
           <div className="md:hidden">
             <button onClick={toggleDrawer}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                className="fill-text"
-              >
-                <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path>
-              </svg>
+              {isDrawer ? crossIcon : burgerMenuIcon}
             </button>
           </div>
 
           {/* for full-size */}
-          <div className="hidden bg-background text-text md:flex flex-col items-start w-full">
-            <form
-              className="flex text-text border-2 rounded-2xl px-2 w-full"
-              onSubmit={handleSubmit}
-            >
-              <button type="submit">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  className="fill-text"
+          <div className="hidden bg-background text-text md:flex flex-col w-full justify-between h-full  ">
+            <div className="w-full flex flex-col">
+              <form
+                className="flex text-text border-2 rounded-2xl px-2 w-full"
+                onSubmit={handleSubmit}
+              >
+                <button type="submit">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    className="fill-text"
+                  >
+                    <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"></path>
+                  </svg>
+                </button>
+
+                <input
+                  className="bg-transparent outline-none px-2 py-1 placeholder:text-text"
+                  autoComplete="off"
+                  id="quick-search"
+                  placeholder="search"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </form>
+
+              <h2 className=" font-bold">tasks</h2>
+
+              <div className="flex flex-col gap-2 px-3">
+                <button className="flex-1" onClick={() => handleHome()}>
+                  <span className="flex gap-2">{homeIcon} Home</span>
+                </button>
+
+                <button
+                  className="flex-1"
+                  onClick={() => handleTaskDate(TaskDateCategory.TODAY)}
                 >
-                  <path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"></path>
-                </svg>
-              </button>
+                  <span className="flex gap-2">{listUlIcon} Today</span>
+                </button>
 
-              <input
-                className="bg-transparent outline-none px-2 py-1"
-                autoComplete="off"
-                id="quick-search"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </form>
+                <button
+                  onClick={() => handleTaskDate(TaskDateCategory.UPCOMING)}
+                  className="flex-1"
+                >
+                  <span className="flex gap-2">
+                    {doubleRightArrowIcon} Upcoming
+                  </span>
+                </button>
+              </div>
 
-            <h2 className=" font-bold">tasks</h2>
+              <h2 className="font-bold">List</h2>
 
-            <div className="flex flex-col">
-              <button onClick={() => handleHome()}>
-                <span className="flex gap-2">{homeIcon} Home</span>
-              </button>
+              {list.map &&
+                list.map((listItem, index) => (
+                  <div className="flex justify-between p-2  w-full">
+                    <button
+                      className="flex-1"
+                      key={index}
+                      onClick={() => handleListItem(listItem)}
+                    >
+                      <div className="flex gap-2">
+                        {solidSquare}
+                        {listItem.name}
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleListDelete(listItem._id || "")}
+                    >
+                      {trashIcon}
+                    </button>
+                  </div>
+                ))}
 
-              <button onClick={() => handleTaskDate(TaskDateCategory.TODAY)}>
-                <span className="flex gap-2">{listUlIcon} Today</span>
-              </button>
-
-              <button onClick={() => handleTaskDate(TaskDateCategory.UPCOMING)}>
-                <span className="flex gap-2">
-                  {doubleRightArrowIcon} Upcoming
-                </span>
-              </button>
+              <List triggerFetch={triggerFetchList} />
             </div>
-
-            <h2 className="font-bold">List</h2>
-            {list.map &&
-              list.map((listItem, index) => (
-                <div className="flex justify-between w-full">
-                  <button key={index} onClick={() => handleListItem(listItem)}>
-                    <div className="flex gap-2">
-                      {solidSquare}
-                      {listItem.name}
-                    </div>
-                  </button>
-                  <button onClick={() => handleListDelete(listItem._id || "")}>
-                    {trashIcon}
-                  </button>
-                </div>
-              ))}
-
-            <List triggerFetch={triggerFetchList} />
 
             <div className="flex justify-between w-full items-end">
               <div>
@@ -212,12 +225,14 @@ function NavBar({
                     {loginIcon}Login
                   </Link>
                 ) : (
-                  <div className="flex flex-col justify-start gap-2">
-                    <p className="font-bold px-2">{user.username}</p>
-                    <button className="flex gap-2" onClick={logout}>
-                      {logOutIcon} logout
+                  <button className="flex flex-col capitalize justify-start gap-2">
+                    <p className=" flex gap-2 font-bold">
+                      {userCircleIcon} {user.username}
+                    </p>
+                    <button className="flex gap-2 " onClick={logout}>
+                      {logOutIcon} Sign out
                     </button>
-                  </div>
+                  </button>
                 )}
               </div>
 
@@ -228,7 +243,7 @@ function NavBar({
 
         {/* Mobile  */}
         {isDrawer && (
-          <div className="md:hidden bg-background text-text flex flex-col items-center w-full border-t-2">
+          <div className="md:hidden bg-background text-text flex flex-col items-center h-screen pt-4">
             <form
               className="flex text-text border-2 rounded-2xl px-2 mt-2"
               onSubmit={handleSubmit}
@@ -246,18 +261,21 @@ function NavBar({
               </button>
 
               <input
-                className="bg-transparent outline-none px-2 py-1"
+                className="bg-transparent outline-none px-2 py-1 placeholder:text-text"
                 autoComplete="off"
                 id="quick-search"
                 type="text"
                 value={searchQuery}
+                placeholder="search"
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </form>
-
-            <div className="w-full p-2 mt-3 ">
-              <h2 className=" font-bold mb-2 text-xl text-dark">Tasks</h2>
+            {/*  */}
+            {/*  */}
+            {/*  */}
+            <div className="w-full p-2 mt-3 h-full flex flex-col justify-start">
               <div className="flex flex-col gap-2">
+                <h2 className=" font-bold mb-2 text-xl text-dark">Tasks</h2>
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => {
@@ -317,17 +335,19 @@ function NavBar({
                 <List triggerFetch={triggerFetchList} />
               </div>
 
-              <div className="flex justify-between w-full items-end">
+              <div className="flex justify-between w-full items-end my-5">
                 <div>
                   {user == null ? (
                     <Link className="font-bold flex gap-2" to="/login">
-                      {loginIcon}Login
+                      {loginIcon} Login
                     </Link>
                   ) : (
                     <div className="flex flex-col justify-start gap-2">
-                      <p className="font-bold px-2">{user.username}</p>
+                      <button className="flex gap-2 capitalize font-semibold">
+                        {userCircleIcon} {user.username}
+                      </button>
                       <button className="flex gap-2" onClick={logout}>
-                        {logOutIcon} logout
+                        {logOutIcon} Sign out
                       </button>
                     </div>
                   )}

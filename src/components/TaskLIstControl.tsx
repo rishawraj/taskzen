@@ -172,8 +172,6 @@ function TaskLIstControl({
     });
   };
 
-  // !
-
   const filterTaskListByAppliedTags = (
     taskList: TaskTypeResponse[],
     tagList: TagType[]
@@ -207,12 +205,12 @@ function TaskLIstControl({
   const filteredTasks = (
     inputTaskList: TaskTypeResponse[]
   ): TaskTypeResponse[] => {
-    console.log(taskDate);
-
     let taskList = inputTaskList;
 
     if (searchQuery !== undefined && searchQuery !== "") {
-      taskList = inputTaskList.filter((task) => task.title === searchQuery);
+      taskList = inputTaskList.filter((task) =>
+        task.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     } else if (listName) {
       taskList = inputTaskList.filter(
         (task) => task.selectedListItem?.name === listName.name
@@ -220,8 +218,6 @@ function TaskLIstControl({
     } else if (taskDate === TaskDateCategory.UPCOMING) {
       taskList = inputTaskList.filter((task) => task.dueDate);
     } else if (taskDate === TaskDateCategory.TODAY) {
-      console.log("today");
-
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -310,6 +306,7 @@ function TaskLIstControl({
       const sorted = sortTasksByCompleted(updatedTaskList);
       const filtered = filteredTasks(sorted);
       setTaskList(filtered);
+      setNewTask("");
 
       const message = await fetchWithAuth<TaskTypeResponse>(
         "/api/tasks",
@@ -335,8 +332,6 @@ function TaskLIstControl({
 
       // trigger
       // setTrigger(!trigger);
-
-      setNewTask("");
     } catch (error) {
       console.error(error);
     }
@@ -350,7 +345,6 @@ function TaskLIstControl({
     const newTaskList = [...originalTaskList];
 
     const newTask = newTaskList.filter((task) => task._id === ID)[0];
-    console.log(task.selectedListItem);
 
     newTask.title = task.title;
     newTask.dueDate = task.dueDate && task.dueDate;
@@ -368,8 +362,6 @@ function TaskLIstControl({
       newTask
     );
 
-    console.log(message);
-
     if (!message) {
       toast.error("Task not updated. Try again!");
       return;
@@ -381,6 +373,7 @@ function TaskLIstControl({
   };
 
   const handleDeleteAll = async () => {
+    closeDotMenu();
     const response = await fetchWithAuth<DeleteResponse>(
       "/api/tasks",
       Methods.DELETE
@@ -445,16 +438,28 @@ function TaskLIstControl({
   const clearAllAppliedTags = () => {
     setAppliedTags([]);
     setLocalStorageItem("appliedTags", []);
+    closeDotMenu();
   };
 
   return (
     <div className="flex flex-col text-text xl:flex-row h-full ">
-      <div>{listName && listName.name}</div>
-      <div>{taskDate && taskDate}</div>
-      <div>{searchQuery && searchQuery}</div>
-      <div className="flex-1 bg-another h-full p-5">
+      <div className="flex-1 bg-background h-full p-5">
+        <h1 className="text-4xl font-bold">
+          {!listName && !taskDate && !searchQuery && "Home"}
+        </h1>
+        <h1 className="text-4xl font-bold ">{listName && listName.name}</h1>
+
+        {taskDate && (
+          <h1 className="text-4xl font-bold ">
+            {!!taskDate && taskDate === "TODAY"
+              ? `Today, ${new Date().getDate()}`
+              : "Upcoming"}
+          </h1>
+        )}
+        <h1 className="text-4xl font-bold ">{searchQuery && searchQuery}</h1>
+
         {/* form */}
-        <form className="flex border-2 rounded-xl" onSubmit={handleSubmit}>
+        <form className="flex border-2 rounded-xl mt-5" onSubmit={handleSubmit}>
           <button className="p-2" type="submit">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -480,13 +485,13 @@ function TaskLIstControl({
         </form>
 
         {/* tags */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
             {appliedTags &&
               appliedTags.map((tag) => (
                 <div
                   key={tag._id}
-                  className=" inline-flex gap-2 bg-amber-3000 p-2 m-2"
+                  className=" inline-flex gap-2 bg-amber-3000 p-2 m-2 bg-accent"
                 >
                   <p>{tag.name}</p>
                   <button onClick={() => handleTagClear(tag._id || "")}>
@@ -495,13 +500,21 @@ function TaskLIstControl({
                 </div>
               ))}
           </div>
+          {/*  */}
+          {/*  */}
+          {/*  */}
 
-          <div className="relative flex">
-            <button onClick={toggleFilterTag} className="flex">
-              {filterIcon} filter tags
-            </button>
+          <div className="flex flex-col bg-amber-3000 py-3">
+            <div className="flex gap-5">
+              <button onClick={toggleFilterTag} className="flex">
+                {filterIcon} filter tags
+              </button>
 
-            <button onClick={toggleDotMenu}>{dotsVerticalIcon}</button>
+              <button className="" onClick={toggleDotMenu}>
+                {dotsVerticalIcon}
+              </button>
+            </div>
+
             {isDotMenu && (
               <Modal
                 isOpen={isDotMenu}
@@ -509,26 +522,36 @@ function TaskLIstControl({
                 fullScreen={false}
                 closeOnOutsideClick={true}
               >
-                <div className="absolute w-full top-10 left-0 z-10 flex flex-col p-2 gap-2 bg-background">
-                  <button onClick={clearAllAppliedTags}>clear all tags</button>
-                  <button
-                    onClick={handleDeleteAll}
-                    className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600"
-                  >
-                    {/* Delete All Tasks */}
-                    clear tasks
-                  </button>
-                  <button
-                    onClick={handleEditTagsClick}
-                    className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
-                  >
-                    edit tags
-                  </button>
+                <div className="relative h-0  ">
+                  <div className="flex flex-col bg-accent gap-2 p-2">
+                    <button
+                      className="bg-pink-500 text-white p-2 rounded hover:bg-pink-600"
+                      onClick={clearAllAppliedTags}
+                    >
+                      clear tags
+                    </button>
+                    <button
+                      onClick={handleDeleteAll}
+                      // className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600"
+                      className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
+                    >
+                      delete tasks
+                    </button>
+
+                    <button
+                      onClick={handleEditTagsClick}
+                      className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
+                    >
+                      edit tags
+                    </button>
+                  </div>
                 </div>
               </Modal>
             )}
           </div>
-
+          {/*  */}
+          {/*  */}
+          {/*  */}
           {isEditTagMenu && (
             <Modal
               isOpen={isEditTagMenu}
@@ -536,13 +559,12 @@ function TaskLIstControl({
               fullScreen={true}
               closeOnOutsideClick={true}
             >
-              <div className="">
-                <div>
-                  <h3>Edit Tags</h3>
+              <div className="bg-primary">
+                <div className="flex justify-between p-4">
+                  <h3 className="font-semibold text-xl">Edit Tags</h3>
                   <button onClick={closeEditMenu}>{crossIcon}</button>
                 </div>
 
-                {/*  */}
                 <Tags />
               </div>
             </Modal>
@@ -550,8 +572,8 @@ function TaskLIstControl({
         </div>
 
         {isFilterTag && (
-          <div className="w-full min-h-[30px] bg-accent flex justify-between ">
-            <div className="flex gap-2 p-2">
+          <div className="w-full bg-accent flex  justify-between items-start p-2 rounded ">
+            <div className="flex gap-2 py-2 flex-wrap">
               {availableTags &&
                 availableTags.map((tag) => (
                   <button
@@ -600,7 +622,7 @@ function TaskLIstControl({
         )}
       </div>
 
-      <div className="flex-1 h-screen xl:sticky top-0 px-10">
+      <div className="flex-1 h-screen xl:sticky top-0 px-10 ">
         {isSideModal ? (
           <Modal
             isOpen={isSideModal}

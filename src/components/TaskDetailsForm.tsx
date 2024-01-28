@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { crossIcon } from "../assets/icons";
+import { crossIcon, trashIcon } from "../assets/icons";
 // import { getLocalStorageItem } from "../utils/localStorage";
 // import { v4 as uuidv4 } from "uuid";
 import {
@@ -217,8 +217,10 @@ function TaskDetailsForm({
   };
 
   return (
-    <>
-      <div className="text-text">
+    // <div className="h-full max-h-screen overflow-y-scroll">
+
+    <div className="text-text bg-primary p-5 h-screen max-h-screen overflow-auto w-screen md:w-full">
+      <div>
         <div className="flex justify-between my-2">
           <div>TaskForm</div>
           <button onClick={closeModal}>{crossIcon}</button>
@@ -340,35 +342,31 @@ function TaskDetailsForm({
             />
           </form>
 
-          {subTaskList &&
-            subTaskList.map((subTask, i) => (
-              <div
-                key={i}
-                className="flex justify-between p-2 border-b-2 border-text "
-              >
-                <div className="flex gap-4">
-                  <p>{subTask.completed ? "1" : "0"}</p>
-                  <input
-                    id={i.toString()}
-                    type="checkbox"
-                    checked={subTask.completed}
-                    onChange={() => handleSubTaskToggle(subTask._id || "")}
-                  />
-                  <p>{subTask.title}</p>
-                </div>
-                <button onClick={() => handleSubTaskDelete(subTask._id || "")}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    className="fill-text"
+          <div className="xl:max-h-80 xl:overflow-y-auto">
+            {subTaskList &&
+              subTaskList.map((subTask, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between p-2 border-b-2 border-text "
+                >
+                  <div className="flex gap-4">
+                    <p>{subTask.completed ? "1" : "0"}</p>
+                    <input
+                      id={i.toString()}
+                      type="checkbox"
+                      checked={subTask.completed}
+                      onChange={() => handleSubTaskToggle(subTask._id || "")}
+                    />
+                    <p>{subTask.title}</p>
+                  </div>
+                  <button
+                    onClick={() => handleSubTaskDelete(subTask._id || "")}
                   >
-                    <path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm10.618-3L15 2H9L7.382 4H3v2h18V4z"></path>
-                  </svg>
-                </button>
-              </div>
-            ))}
+                    {trashIcon}
+                  </button>
+                </div>
+              ))}
+          </div>
 
           {/*  */}
           <button
@@ -389,7 +387,7 @@ function TaskDetailsForm({
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

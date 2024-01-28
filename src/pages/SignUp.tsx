@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../styles/Spinner.css";
 import { useDarkMode } from "../Context/DarkModeContext";
+import logoWhite from "../assets/logo-white.png";
+import logoBlack from "../assets/logo-black.png";
+import "../styles/Loading.css";
 
 function SignUp() {
   const [email, setEmail] = useState("");
@@ -13,9 +15,7 @@ function SignUp() {
 
   const { isDarkMode } = useDarkMode();
 
-  const logoPath = isDarkMode
-    ? "src/assets/logo-white.png"
-    : "src/assets/logo-black.png";
+  const logoPath = isDarkMode ? logoWhite : logoBlack;
 
   const VITE_BASE_BACKEND_URL = import.meta.env.VITE_BASE_BACKEND_URL;
 

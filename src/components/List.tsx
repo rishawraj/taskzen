@@ -111,9 +111,10 @@ function List({ triggerFetch }: ListProps) {
         isOpen={isListMenu}
         onClose={closeListMenu}
         fullScreen={isSmallScreen}
+        closeOnOutsideClick={isSmallScreen}
       >
-        <div className="bg-accent w-full">
-          <div className="flex justify-between">
+        <div className="bg-accent w-full p-3 text-text rounded">
+          <div className="flex justify-between mb-5">
             <h3 className="text-xl">Add List</h3>
             <button onClick={closeListMenu}>{crossIcon}</button>
           </div>
@@ -124,11 +125,15 @@ function List({ triggerFetch }: ListProps) {
               value={newListItem}
               type="text"
               name="list-name"
-              className="outline-none"
+              placeholder="add list"
+              className="outline-none placeholder:text-text bg-transparent px-3 py-1"
             />
           </form>
 
-          <button onClick={handleClearAll} className="p-2 mt-2">
+          <button
+            onClick={handleClearAll}
+            className="p-2 mt-5 bg-dark text-text"
+          >
             clear all lists
           </button>
         </div>

@@ -41,7 +41,7 @@ export default function Home() {
   return (
     <>
       <div className="flex flex-col md:flex-row bg-background justify-start h-full min-h-screen">
-        <div className="md:w-1/3 md:max-w-sm sticky top-0 h-full">
+        <div className="md:w-1/3 md:max-w-sm sticky top-0 md:h-screen">
           <NavBar
             handleListItem={handleListItem}
             handleSearchQuery={handleSearchQuery}
@@ -50,7 +50,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="md:w-2/3 flex-grow">
+        <div className="md:w-2/3 flex-grow p-5">
           <TaskLIstControl
             key={count}
             listName={listItem}

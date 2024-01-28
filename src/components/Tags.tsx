@@ -100,11 +100,14 @@ function Tags() {
   };
 
   return (
-    <>
-      <div className="inline-flex gap-2 flex-wrap">
+    <div className="bg-primary max-w-md p-4">
+      <div className="inline-flex gap-2 flex-wrap ">
         {tags &&
           tags.map((tag, index) => (
-            <span key={index} className="flex bg-amber-1000 p-2 gap-2">
+            <span
+              key={index}
+              className="flex bg-amber-1000 p-2 gap-2 bg-accent"
+            >
               <p>{tag.name}</p>
               <button onClick={() => handleTagDelete(tag._id || "")}>
                 {crossIcon}
@@ -113,7 +116,7 @@ function Tags() {
           ))}
       </div>
 
-      <div className="">
+      <div className="mt-4">
         <form
           onSubmit={handleSubmit}
           className="flex bg-background rounded border-2 border-green-500"
@@ -128,12 +131,11 @@ function Tags() {
             onChange={(e) => setNewTagName(e.target.value)}
           />
         </form>
-
-        <button onClick={handleClearAll} className="bg-secondary p-2">
-          clear all
-        </button>
       </div>
-    </>
+      <button onClick={handleClearAll} className="bg-secondary p-2 mt-4">
+        clear all
+      </button>
+    </div>
   );
 }
 
