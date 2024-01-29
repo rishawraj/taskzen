@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
+// import { toast } from "react-toastify";
 
 interface User {
   username: string;
@@ -14,7 +15,7 @@ interface User {
 interface AuthContextProps {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<Response | undefined>;
   logout: () => void;
 }
 
@@ -57,6 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem("userId", userData.userId);
       } else {
         console.error("Login failed");
+        return respsone;
       }
     } catch (error) {
       console.error("Error Logging in", error);

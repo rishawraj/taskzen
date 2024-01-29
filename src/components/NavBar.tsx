@@ -18,6 +18,7 @@ import {
 import { useAuth } from "../Context/AuthContext";
 import { Methods, fetchWithAuth } from "../utils/fetchWithAuth";
 import { ListResponse, TaskDateCategory } from "../types/types";
+import { toast } from "react-toastify";
 
 export type NavBarProps = {
   handleTaskDate: (taskDateProp: TaskDateCategory) => void;
@@ -92,6 +93,11 @@ function NavBar({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (searchQuery === "") {
+      toast.info("Search query cannot be empty");
+      return;
+    }
     handleSearchQuery(searchQuery);
     setSearchQuery("");
     setDrawer(!isDrawer);
@@ -120,7 +126,7 @@ function NavBar({
   return (
     <>
       <nav className="flex flex-col p-3 sticky text-text h-full capitalize bg-background">
-        <div className="flex md:flex-col md:justify-start justify-between items-start">
+        <div className="flex md:flex-col md:justify-start justify-between items-start md:h-screen">
           <button
             className="font-bold text-2xl"
             onClick={() => {
@@ -139,8 +145,8 @@ function NavBar({
           </div>
 
           {/* for full-size */}
-          <div className="hidden bg-background text-text md:flex flex-col w-full justify-between h-full  ">
-            <div className="w-full flex flex-col">
+          <div className="hidden bg-background text-text md:flex flex-col w-full justify-between h-full p-5">
+            <div className="w-full flex flex-col gap-4">
               <form
                 className="flex text-text border-2 rounded-2xl px-2 w-full"
                 onSubmit={handleSubmit}
@@ -158,7 +164,7 @@ function NavBar({
                 </button>
 
                 <input
-                  className="bg-transparent outline-none px-2 py-1 placeholder:text-text"
+                  className="bg-transparent outline-none px-2 py-1 placeholder:text-gray-400"
                   autoComplete="off"
                   id="quick-search"
                   placeholder="search"
@@ -170,51 +176,60 @@ function NavBar({
 
               <h2 className=" font-bold">tasks</h2>
 
-              <div className="flex flex-col gap-2 px-3">
-                <button className="flex-1" onClick={() => handleHome()}>
-                  <span className="flex gap-2">{homeIcon} Home</span>
-                </button>
+              <div>
+                <div className="flex flex-col">
+                  <button
+                    className="flex-1 hover:bg-accent rounded  p-2"
+                    onClick={() => handleHome()}
+                  >
+                    <span className="flex gap-2">{homeIcon} Home</span>
+                  </button>
 
-                <button
-                  className="flex-1"
-                  onClick={() => handleTaskDate(TaskDateCategory.TODAY)}
-                >
-                  <span className="flex gap-2">{listUlIcon} Today</span>
-                </button>
+                  <button
+                    className="flex-1 hover:bg-accent rounded p-2"
+                    onClick={() => handleTaskDate(TaskDateCategory.TODAY)}
+                  >
+                    <span className="flex gap-2">{listUlIcon} Today</span>
+                  </button>
 
-                <button
-                  onClick={() => handleTaskDate(TaskDateCategory.UPCOMING)}
-                  className="flex-1"
-                >
-                  <span className="flex gap-2">
-                    {doubleRightArrowIcon} Upcoming
-                  </span>
-                </button>
+                  <button
+                    onClick={() => handleTaskDate(TaskDateCategory.UPCOMING)}
+                    className="flex-1 hover:bg-accent rounded p-2"
+                  >
+                    <span className="flex gap-2 ">
+                      {doubleRightArrowIcon} Upcoming
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <h2 className="font-bold">List</h2>
 
-              {list.map &&
-                list.map((listItem, index) => (
-                  <div className="flex justify-between p-2  w-full">
-                    <button
-                      className="flex-1"
-                      key={index}
-                      onClick={() => handleListItem(listItem)}
+              <div className="flex flex-col">
+                {list.map &&
+                  list.map((listItem, index) => (
+                    <div
+                      key={listItem._id}
+                      className="flex justify-between p-2 w-full hover:bg-accent rounded"
                     >
-                      <div className="flex gap-2">
-                        {solidSquare}
-                        {listItem.name}
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => handleListDelete(listItem._id || "")}
-                    >
-                      {trashIcon}
-                    </button>
-                  </div>
-                ))}
-
+                      <button
+                        className="flex-1"
+                        key={index}
+                        onClick={() => handleListItem(listItem)}
+                      >
+                        <div className="flex gap-2">
+                          {solidSquare}
+                          {listItem.name}
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => handleListDelete(listItem._id || "")}
+                      >
+                        {trashIcon}
+                      </button>
+                    </div>
+                  ))}
+              </div>
               <List triggerFetch={triggerFetchList} />
             </div>
 
@@ -225,14 +240,14 @@ function NavBar({
                     {loginIcon}Login
                   </Link>
                 ) : (
-                  <button className="flex flex-col capitalize justify-start gap-2">
+                  <div className="flex flex-col capitalize justify-start gap-2">
                     <p className=" flex gap-2 font-bold">
                       {userCircleIcon} {user.username}
                     </p>
                     <button className="flex gap-2 " onClick={logout}>
                       {logOutIcon} Sign out
                     </button>
-                  </button>
+                  </div>
                 )}
               </div>
 

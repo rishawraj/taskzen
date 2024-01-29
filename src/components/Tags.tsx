@@ -50,11 +50,13 @@ function Tags() {
     const trimmedTagName = newTagName.trim().toLowerCase();
 
     if (trimmedTagName === "") {
+      toast.info("Tag name cannot be empty");
       return;
     }
 
     const index = tags.findIndex((t) => t.name === trimmedTagName);
     if (index !== -1) {
+      toast.info("Tag already exists");
       return;
     }
 

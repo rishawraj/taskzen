@@ -37,8 +37,6 @@ const Modal = ({
     }
   }, [isOpen, onClose]);
 
-  // useEffect(() => {}, []);
-
   if (!isOpen) return null;
 
   return fullScreen ? (
@@ -48,7 +46,9 @@ const Modal = ({
       </div>
     </div>
   ) : (
-    <div ref={modalContentRef}>{children}</div>
+    <div className="flex justify-center items-center" ref={modalContentRef}>
+      {children}
+    </div>
   );
 };
 

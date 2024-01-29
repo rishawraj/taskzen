@@ -40,8 +40,9 @@ const getLocalStorageItem = <T>(key: string): T | [] => {
         return [] as T;
       }
     } else {
-      console.error("Invalid type stored in localStorage.");
-      return [] as T;
+      // console.error("Invalid type stored in localStorage.");
+      // return [] as T;
+      return [];
     }
   } else {
     console.error("localStorage is not supported in this browser.");

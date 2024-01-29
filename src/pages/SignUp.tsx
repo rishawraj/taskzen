@@ -10,6 +10,7 @@ function SignUp() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -20,7 +21,21 @@ function SignUp() {
   const VITE_BASE_BACKEND_URL = import.meta.env.VITE_BASE_BACKEND_URL;
 
   const handleSignup = async () => {
+    setError("");
     try {
+      if (email === "") {
+        setError("Email cannot be empty");
+        return;
+      }
+      if (username === "") {
+        setError("Username cannot be empty");
+        return;
+      }
+      if (password === "") {
+        setError("Password cannot be empty");
+        return;
+      }
+
       setIsLoading(true);
       const response = await fetch(VITE_BASE_BACKEND_URL + "/api/user/signup", {
         method: "POST",
@@ -41,6 +56,7 @@ function SignUp() {
         navigate("/login");
       } else {
         console.error("Signup failed");
+        setError("Sign Up failed");
       }
     } catch (error) {
       console.error("Error during signup:", error);
@@ -101,6 +117,10 @@ function SignUp() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+
+        {error && (
+          <div className="mb-4 p-2 bg-red-500 text-white rounded">{error}</div>
+        )}
 
         {isLoading ? (
           <div className="lds-ellipsis">

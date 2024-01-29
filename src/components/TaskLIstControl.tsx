@@ -444,9 +444,6 @@ function TaskLIstControl({
   return (
     <div className="flex flex-col text-text xl:flex-row h-full ">
       <div className="flex-1 bg-background h-full p-5">
-        <h1 className="text-4xl font-bold">
-          {!listName && !taskDate && !searchQuery && "Home"}
-        </h1>
         <h1 className="text-4xl font-bold ">{listName && listName.name}</h1>
 
         {taskDate && (
@@ -590,15 +587,17 @@ function TaskLIstControl({
         )}
 
         {isLoading ? (
-          <div className="lds-roller">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+          <div className="text-center">
+            <div className="lds-roller">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
           </div>
         ) : (
           <main className="">
@@ -616,13 +615,15 @@ function TaskLIstControl({
                 />
               ))
             ) : (
-              <h3>NO TAKS FOUND!</h3>
+              <h3 className="bg-red-3000 font-semibold text-center p-2">
+                No tasks found!
+              </h3>
             )}
           </main>
         )}
       </div>
 
-      <div className="flex-1 h-screen xl:sticky top-0 px-10 ">
+      <div className="flex-1 h-screen xl:sticky top-0 px-10 flex0 justify-center0 items-center0">
         {isSideModal ? (
           <Modal
             isOpen={isSideModal}
@@ -640,7 +641,7 @@ function TaskLIstControl({
             />
           </Modal>
         ) : (
-          <div className="hidden min-h-screen xl:flex justify-center p-5">
+          <div className="hidden min-h-screen xl:flex justify-center p-5 font-semibold">
             <h2>Please open a task!</h2>
           </div>
         )}

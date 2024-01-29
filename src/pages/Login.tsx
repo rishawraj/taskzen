@@ -5,10 +5,12 @@ import { useDarkMode } from "../Context/DarkModeContext";
 import logoWhite from "../assets/logo-white.png";
 import logoBlack from "../assets/logo-black.png";
 import "../styles/Loading.css";
+// import { ToastContainer, toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const { login, isLoading } = useAuth();
@@ -17,12 +19,25 @@ const Login = () => {
   const logoPath = isDarkMode ? logoWhite : logoBlack;
 
   const handleLogin = async () => {
+    setError("");
     try {
-      await login(email, password);
-
-      navigate("/");
+      if (email === "") {
+        setError("Email cannot be empty");
+        return;
+      }
+      if (password === "") {
+        setError("Password cannot be empty");
+        return;
+      }
+      const response = await login(email, password);
+      if (response?.status == 401) {
+        setError("Email or Password is incorrect");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.error("Error during login:", error);
+      setError("Error during login");
     }
   };
 
@@ -63,6 +78,10 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+
+        {error && (
+          <div className="mb-4 p-2 bg-red-500 text-white rounded">{error}</div>
+        )}
 
         {isLoading ? (
           <div className="lds-ellipsis">
