@@ -50,8 +50,7 @@ function SignUp() {
       });
 
       if (response.ok) {
-        const data = (await response.json()) as any;
-        console.log(data);
+        await response.json();
 
         navigate("/login");
       } else {

@@ -49,8 +49,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           username: string;
         };
 
-        console.log(userData);
-
         setUser({ username: userData.username, userId: userData.userId });
 
         localStorage.setItem("jwtToken", userData.token);

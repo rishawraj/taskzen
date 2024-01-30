@@ -77,7 +77,7 @@ export interface DeleteResponse {
 export interface ListResponse {
   _id?: string;
   name: string;
-  tasks?: any[];
+  tasks?: TaskTypeResponse[];
   user?: string;
   createdAt?: string;
   updatedAt?: string;

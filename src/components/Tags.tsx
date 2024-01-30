@@ -34,8 +34,6 @@ function Tags() {
       Methods.DELETE
     );
 
-    console.log(response);
-
     if (!response) {
       setTags(backupTagList);
       toast.error("Tag not deleted, Try again");
@@ -88,7 +86,6 @@ function Tags() {
       setTags([]);
 
       const response = await fetchWithAuth("/api/tags", Methods.DELETE);
-      console.log(response);
       if (!response) {
         setTags(backup);
         // toast.success("all tags deleted");

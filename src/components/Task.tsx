@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { TaskProps } from "../types/types";
 
 function Task({
@@ -13,23 +12,6 @@ function Task({
     updateCurrTask(task._id || "");
     openSideModal();
   };
-  useEffect(() => {
-    if (!task.dueDate) {
-      return;
-    }
-
-    const dueDate = new Date(task.dueDate);
-
-    console.log(formatDate(dueDate));
-
-    const formattedDueDate = dueDate.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    });
-
-    console.log(formattedDueDate);
-  }, []);
 
   const formatDate = (date: Date | undefined) => {
     if (!date) {

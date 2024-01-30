@@ -326,7 +326,7 @@ function NavBar({
 
                 {list.map &&
                   list.map((listItem, index) => (
-                    <div className="flex justify-between">
+                    <div key={listItem._id} className="flex justify-between">
                       <button
                         key={index}
                         onClick={() => {

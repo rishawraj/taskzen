@@ -82,7 +82,7 @@ function TaskLIstControl({
         const filtered = filteredTasks(sorted);
         setTaskList(filtered);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       } finally {
         setIsLoading(false);
       }
@@ -95,7 +95,6 @@ function TaskLIstControl({
   useEffect(() => {
     const fetchTags = async () => {
       const response = await fetchWithAuth<TagType[]>("/api/tags");
-      console.log(response);
 
       setAvailableTags(response);
     };
@@ -121,17 +120,12 @@ function TaskLIstControl({
 
   //! filter tasks
   useEffect(() => {
-    // console.log(taskDate);
-    // console.log(listName);
-
     fetchWithAuth<TaskTypeResponse[]>("/api/tasks")
       .then((data) => {
         setOrginalTaskList(data);
         const sorted = sortTasksByCompleted(data);
-        // console.log(sorted);
 
         const filtered = filteredTasks(sorted);
-        // console.log(filtered);
 
         setTaskList(filtered);
       })
@@ -223,8 +217,6 @@ function TaskLIstControl({
 
       taskList = inputTaskList.filter((task) => {
         if (task.dueDate) {
-          console.log(task.title);
-
           const dueDate = new Date(task.dueDate);
           dueDate.setHours(0, 0, 0, 0);
 
@@ -298,7 +290,6 @@ function TaskLIstControl({
 
       if (taskDate === TaskDateCategory.TODAY) {
         const date = new Date();
-        console.log(date);
         task.dueDate = date;
       }
 

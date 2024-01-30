@@ -66,7 +66,6 @@ function TaskDetailsForm({
       const response = await fetchWithAuth<ListResponse>(
         `/api/lists/${task?.selectedListItem._id}`
       );
-      console.log(response);
       setCurrListItem(response);
     };
 
@@ -77,8 +76,6 @@ function TaskDetailsForm({
   }, []);
 
   const handleModalClose = async () => {
-    console.log("does this also gets run??");
-
     //! api call
     const tasks = await fetchWithAuth<TaskTypeResponse[]>("/api/tasks");
     const subTasks = tasks[index].subTasks || [];
@@ -179,9 +176,7 @@ function TaskDetailsForm({
   };
 
   const handleSubmit = () => {
-    const taskTagsIds = taskTags.map((tag) => (!!tag._id ? tag._id : ""));
-
-    console.log(selectedListItem);
+    const taskTagsIds = taskTags.map((tag) => (tag._id ? tag._id : ""));
 
     const updatedTask: TaskTypeResponse = {
       title: title,
@@ -209,7 +204,6 @@ function TaskDetailsForm({
       setCurrListItem(undefined);
     } else {
       const currList = list.find((listItem) => listItem.name === selectedValue);
-      console.log(currList);
 
       if (currList) {
         setSelectedListItem(currList);

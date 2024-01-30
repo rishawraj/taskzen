@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthContext";
+// import { useAuth } from "../Context/AuthContext";
 import { ReactNode } from "react";
 
 interface PrivateRouteProps {
@@ -7,8 +7,7 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { user } = useAuth();
-  console.log(user);
+  // const { user } = useAuth();
 
   const userId = localStorage.getItem("userId");
 
