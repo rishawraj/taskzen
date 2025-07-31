@@ -48,6 +48,15 @@ const Login = () => {
       </div>
       <div className="bg-primary p-8 rounded shadow-md w-96">
         <h2 className="text-3xl font-semibold mb-6">Login</h2>
+        <div className="text-sm text-lightText mb-4">
+          <p>
+            Note: Backend is hosted on Render.com and may take a few minutes to
+            start up.
+          </p>
+          <p className="mt-2">Demo credentials:</p>
+          <p>Email: demo@gmail.com</p>
+          <p>Password: demo</p>
+        </div>
         <div className="mb-4">
           <label
             className="block text-lightText text-sm font-bold mb-2 text-l"
